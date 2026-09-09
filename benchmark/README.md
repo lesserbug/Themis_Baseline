@@ -11,6 +11,14 @@ leader, before simulating commit. These control messages are not a BFT quorum
 certificate. Latency ends at leader-side final ordering after this gate; it
 excludes real hosting consensus and follower commit-notification delivery.
 
+At cutoff the leader cancels its pipeline independently of the local-order
+ticker, so a blocked evidence enqueue can exit. Uncommitted proposal graph
+construction, updates and comparison check cancellation cooperatively; partial
+results are discarded without changing the committed prefix or counting a
+verification failure. In-progress commits and follower verification still finish
+before the final-state barrier. This does not impose a hard bound on all cleanup
+work or change the measurement window, quorum, graph rules or queue capacities.
+
 The generator uses AUTIG's cumulative floor(rate * elapsed_seconds) pacing,
 real submission timestamps, and synchronous fanout to every replica. It catches
 up only before the leader's deadline and finishes the fanout of an already

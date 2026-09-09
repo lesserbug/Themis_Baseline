@@ -3,8 +3,10 @@ package ofo
 import (
 	"SpeedFair_simplify/pkg/network"
 	"SpeedFair_simplify/pkg/types"
+	"context"
 	"crypto/ed25519"
 	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"reflect"
 	"sort"
@@ -272,5 +274,68 @@ func TestMeasurementExcludesLateFinalization(t *testing.T) {
 	count, _, samples := service.GetMeasurementStats()
 	if count != 1 || samples != 1 || service.GetFinalizedCount() != 2 {
 		t.Fatalf("measurement=%d samples=%d total=%d", count, samples, service.GetFinalizedCount())
+	}
+}
+
+func TestStartDeadlineUnblocksLocalEvidenceEnqueue(t *testing.T) {
+	// No collector consumes this channel: model a saturated evidence pipeline.
+	pipelineCtx, pipelineCancel := context.WithCancel(context.Background())
+	defer pipelineCancel()
+	service := &OFOService{
+		isLeader: true, loInterval: time.Millisecond,
+		pipelineCtx: pipelineCtx, pipelineCancel: pipelineCancel,
+		replicaOrdersChan: make(chan *types.ReplicaOrders),
+		auth:              newTestOrderAuthenticator(5),
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	done := make(chan struct{})
+	go func() { service.Start(ctx); close(done) }()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		pipelineCancel()
+		<-done
+		t.Fatal("measurement deadline did not unblock local evidence enqueue")
+	}
+}
+
+func TestDeadlineCancelsLargeProposalWithoutChangingCommittedPrefix(t *testing.T) {
+	auth := newTestOrderAuthenticator(5)
+	service, _ := NewOFOService(0, 5, 1, .95, &testNetwork{}, 200, 1000, false, auth)
+	a := testTx(1)
+	putKnownTransactions(service, a)
+	initial := signedOrders(t, auth, 5, 1, 1, map[uint64][][32]byte{0: {a}, 1: {a}, 2: {a}, 3: {a}}, nil)
+	if !service.CommitProposal(service.buildProposal(initial)) {
+		t.Fatal("could not commit initial prefix")
+	}
+	height, state, digest := service.CommittedContext()
+	count, _, samples := service.GetMeasurementStats()
+	ids := make([][32]byte, 6000)
+	for i := range ids {
+		binary.BigEndian.PutUint64(ids[i][:8], uint64(i+100))
+	}
+	orders := signedOrders(t, auth, 5, 1, 2, map[uint64][][32]byte{0: ids, 1: ids, 2: ids, 3: ids}, nil)
+	proposed := make(chan struct{}, 1)
+	service.SetProposalSink(func(*types.LeaderProposal) bool { proposed <- struct{}{}; return false })
+	service.batchReadyChan <- orders
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	done := make(chan struct{})
+	go func() { service.Start(ctx); service.Stop(); close(done) }()
+	select {
+	case <-done:
+	case <-time.After(3 * time.Second):
+		t.Fatal("large proposal prevented pipeline shutdown")
+	}
+	select {
+	case <-proposed:
+		t.Fatal("cancelled candidate reached hosting adapter")
+	default:
+	}
+	afterHeight, afterState, afterDigest := service.CommittedContext()
+	afterCount, _, afterSamples := service.GetMeasurementStats()
+	if height != afterHeight || state != afterState || digest != afterDigest || count != afterCount || samples != afterSamples {
+		t.Fatal("cancellation changed committed state or measurement")
 	}
 }

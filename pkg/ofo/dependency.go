@@ -4,6 +4,7 @@ package ofo
 import (
 	"SpeedFair_simplify/pkg/types"
 	"bytes"
+	"context"
 	"fmt"
 	"math"
 	"math/big"
@@ -15,6 +16,7 @@ type WeightMatrix map[[32]byte]map[[32]byte]int
 
 // DependencyManager 封装了Themis的依赖图计算逻辑
 type DependencyManager struct {
+	ctx      context.Context
 	graph    *types.DependencyGraph
 	txStates map[[32]byte]types.TxState
 	weights  WeightMatrix
@@ -22,6 +24,7 @@ type DependencyManager struct {
 
 func NewDependencyManager() *DependencyManager {
 	return &DependencyManager{
+		ctx: context.Background(),
 		graph: &types.DependencyGraph{
 			Nodes: make(map[[32]byte]bool),
 			Edges: make(map[[32]byte][][32]byte),
@@ -73,10 +76,16 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 	gamma float64,
 	committedTxIDs map[[32]byte]bool,
 ) bool {
+	if dm.ctx.Err() != nil {
+		return false
+	}
 	uniqueTxsInOrders := make(map[[32]byte]bool)
 	filteredOrders := make([]*types.LocalOrder, 0, len(orders))
 	seenSenders := make(map[uint64]bool)
 	for _, order := range orders {
+		if dm.ctx.Err() != nil {
+			return false
+		}
 		if order == nil || seenSenders[order.ReplicaID] {
 			continue
 		}
@@ -140,6 +149,9 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 	for _, order := range filteredOrders {
 		txList := order.OrderedTxs
 		for i := 0; i < len(txList); i++ {
+			if dm.ctx.Err() != nil {
+				return false
+			}
 			tx1 := txList[i]
 			if _, ok := dm.graph.Nodes[tx1]; !ok {
 				continue
@@ -166,6 +178,9 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 	for i := 0; i < len(sortedNodes); i++ {
 		u := sortedNodes[i]
 		for j := i + 1; j < len(sortedNodes); j++ {
+			if dm.ctx.Err() != nil {
+				return false
+			}
 			v := sortedNodes[j]
 			wUV := dm.weights[u][v]
 			wVU := dm.weights[v][u]
@@ -191,17 +206,26 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 }
 
 func (dm *DependencyManager) CutShadedTail() {
-	if len(dm.graph.Nodes) == 0 {
+	if dm.ctx.Err() != nil || len(dm.graph.Nodes) == 0 {
 		return
 	}
 
 	// Build the condensation graph and locate every solid SCC.
-	sccsData := tarjanSCC(dm.graph)
+	sccsData := tarjanSCC(dm.ctx, dm.graph)
+	if dm.ctx.Err() != nil {
+		return
+	}
 	condensationGraph, _, sccInfos := dm.buildCondensationAndSCCInfo(sccsData)
+	if dm.ctx.Err() != nil {
+		return
+	}
 	reverseCondensation := make(map[int][]int, len(condensationGraph))
 	keepSCC := make(map[int]bool)
 	queue := make([]int, 0)
 	for from, targets := range condensationGraph {
+		if dm.ctx.Err() != nil {
+			return
+		}
 		for _, to := range targets {
 			reverseCondensation[to] = append(reverseCondensation[to], from)
 		}
@@ -223,6 +247,9 @@ func (dm *DependencyManager) CutShadedTail() {
 	// Reverse reachability is required because a topological ordering of the
 	// condensation graph need not be a total order.
 	for len(queue) > 0 {
+		if dm.ctx.Err() != nil {
+			return
+		}
 		to := queue[0]
 		queue = queue[1:]
 		for _, from := range reverseCondensation[to] {
@@ -246,6 +273,9 @@ func (dm *DependencyManager) CutShadedTail() {
 	newTxStates := make(map[[32]byte]types.TxState)
 
 	for node := range dm.graph.Nodes {
+		if dm.ctx.Err() != nil {
+			return
+		}
 		if nodesToKeep[node] {
 			newGraphNodes[node] = true
 			newTxStates[node] = dm.txStates[node]
@@ -271,12 +301,13 @@ func (dm *DependencyManager) CutShadedTail() {
 }
 
 func FairUpdate(
+	ctx context.Context,
 	updateOrders []*types.UpdateOrder,
 	deferredGraph *types.DependencyGraph,
 	n, f uint64,
 	gamma float64,
 ) map[[32]byte][][32]byte {
-	if deferredGraph == nil {
+	if ctx.Err() != nil || deferredGraph == nil {
 		return nil
 	}
 	threshold := edgeThreshold(n, f, gamma)
@@ -292,6 +323,9 @@ func FairUpdate(
 	for i := 0; i < len(txsInGraph); i++ {
 		u := txsInGraph[i]
 		for j := i + 1; j < len(txsInGraph); j++ {
+			if ctx.Err() != nil {
+				return nil
+			}
 			v := txsInGraph[j]
 			uHasV, vHasU := false, false
 			if edges, ok := deferredGraph.Edges[u]; ok {
@@ -342,6 +376,9 @@ func FairUpdate(
 			}
 		}
 		for u, vMap := range pairsToUpdate {
+			if ctx.Err() != nil {
+				return nil
+			}
 			for v := range vMap {
 				posU, okU := txPos[u]
 				posV, okV := txPos[v]
@@ -364,6 +401,9 @@ func FairUpdate(
 
 	newEdges := make(map[[32]byte][][32]byte)
 	for u, vMap := range pairsToUpdate {
+		if ctx.Err() != nil {
+			return nil
+		}
 		for v := range vMap {
 			wUV := weights[u][v]
 			wVU := weights[v][u]
@@ -437,7 +477,7 @@ func (dm *DependencyManager) ComputeFairOrder() [][32]byte {
 		return nil
 	}
 
-	sccsData := tarjanSCC(dm.graph)
+	sccsData := tarjanSCC(dm.ctx, dm.graph)
 	condensationGraph, _, sccInfos := dm.buildCondensationAndSCCInfo(sccsData)
 	sortedSCCIndices := topoSortCondensation(condensationGraph)
 
@@ -615,8 +655,14 @@ func (dm *DependencyManager) buildCondensationAndSCCInfo(sccsData [][][32]byte) 
 	}
 
 	for u, neighbors := range dm.graph.Edges {
+		if dm.ctx.Err() != nil {
+			return nil, nil, nil
+		}
 		sccUIndex := nodeToSCCIndex[u]
 		for _, v := range neighbors {
+			if dm.ctx.Err() != nil {
+				return nil, nil, nil
+			}
 			sccVIndex := nodeToSCCIndex[v]
 			if sccUIndex != sccVIndex {
 				exists := false
@@ -635,7 +681,7 @@ func (dm *DependencyManager) buildCondensationAndSCCInfo(sccsData [][][32]byte) 
 	return condensationGraph, nodeToSCCIndex, sccInfos
 }
 
-func tarjanSCC(graph *types.DependencyGraph) [][][32]byte {
+func tarjanSCC(ctx context.Context, graph *types.DependencyGraph) [][][32]byte {
 	index, indices, lowlink := 0, make(map[[32]byte]int), make(map[[32]byte]int)
 	var stack [][32]byte
 	onStack := make(map[[32]byte]bool)
@@ -643,6 +689,9 @@ func tarjanSCC(graph *types.DependencyGraph) [][][32]byte {
 
 	var strongConnect func(v [32]byte)
 	strongConnect = func(v [32]byte) {
+		if ctx.Err() != nil {
+			return
+		}
 		indices[v], lowlink[v] = index, index
 		index++
 		stack = append(stack, v)
@@ -656,6 +705,9 @@ func tarjanSCC(graph *types.DependencyGraph) [][][32]byte {
 		}
 
 		for _, w := range sortedNeighbors {
+			if ctx.Err() != nil {
+				return
+			}
 			if _, visited := indices[w]; !visited {
 				strongConnect(w)
 				lowlink[v] = min(lowlink[v], lowlink[w])
@@ -687,6 +739,9 @@ func tarjanSCC(graph *types.DependencyGraph) [][][32]byte {
 	sort.Slice(nodesToVisit, func(i, j int) bool { return bytes.Compare(nodesToVisit[i][:], nodesToVisit[j][:]) < 0 })
 
 	for _, v := range nodesToVisit {
+		if ctx.Err() != nil {
+			return nil
+		}
 		if _, visited := indices[v]; !visited {
 			strongConnect(v)
 		}

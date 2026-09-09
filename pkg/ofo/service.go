@@ -611,6 +611,11 @@ func (s *OFOService) HandleMessage(msg network.Message) {
 }
 
 func (s *OFOService) Start(ctx context.Context) {
+	if s.isLeader {
+		// Cancel even when local evidence generation is blocked on a full queue.
+		stopCancel := context.AfterFunc(ctx, s.pipelineCancel)
+		defer stopCancel()
+	}
 	ticker := time.NewTicker(s.loInterval)
 	defer ticker.Stop()
 	for {
@@ -837,6 +842,9 @@ func (s *OFOService) runCollectorStage() {
 	for {
 		select {
 		case order := <-s.replicaOrdersChan:
+			if s.pipelineCtx.Err() != nil {
+				return
+			}
 			if !s.validateReplicaOrders(order) {
 				continue
 			}
@@ -869,7 +877,7 @@ func (s *OFOService) runProposerStage() {
 		case <-s.pipelineCtx.Done():
 			return
 		case batchOrders, ok := <-s.batchReadyChan:
-			if !ok {
+			if !ok || s.pipelineCtx.Err() != nil {
 				return
 			}
 
@@ -878,7 +886,7 @@ func (s *OFOService) runProposerStage() {
 			}
 
 			proposal := s.buildProposal(batchOrders)
-			if proposal == nil || s.proposalSink == nil {
+			if proposal == nil || s.proposalSink == nil || s.pipelineCtx.Err() != nil {
 				continue
 			}
 			if s.proposalSink(proposal) {
@@ -896,6 +904,13 @@ func (s *OFOService) buildProposal(batchOrders []*types.ReplicaOrders) *types.Le
 }
 
 func (s *OFOService) recomputeProposal(height uint64, batchOrders []*types.ReplicaOrders) *types.LeaderProposal {
+	ctx := context.Background()
+	if s.isLeader {
+		ctx = s.pipelineCtx
+	}
+	if ctx.Err() != nil {
+		return nil
+	}
 	if uint64(len(batchOrders)) != s.replicaCount-s.fFaulty {
 		return nil
 	}
@@ -911,6 +926,10 @@ func (s *OFOService) recomputeProposal(height uint64, batchOrders []*types.Repli
 	deferred := make(map[uint64]*types.LeaderProposal, len(s.deferredProposals))
 	excluded := make(map[[32]byte]bool)
 	for proposalHeight, proposal := range s.deferredProposals {
+		if ctx.Err() != nil {
+			s.deferredMu.RUnlock()
+			return nil
+		}
 		deferred[proposalHeight] = cloneProposal(proposal)
 		for id := range proposal.Graph.Nodes {
 			excluded[id] = true
@@ -925,22 +944,26 @@ func (s *OFOService) recomputeProposal(height uint64, batchOrders []*types.Repli
 
 	newTxOrders, updateOrders := s.separateOrderTypes(batchOrders)
 	dm := NewDependencyManager()
+	dm.ctx = ctx
 	if dm.BuildGraphAndClassifyTxs(newTxOrders, s.replicaCount, s.fFaulty, s.gamma, excluded) {
 		dm.CutShadedTail()
 	}
 	updates := make(map[uint64]map[[32]byte][][32]byte)
 	for proposalHeight, deferredProposal := range deferred {
+		if ctx.Err() != nil {
+			return nil
+		}
 		if uint64(len(updateOrders)) != s.replicaCount-s.fFaulty {
 			return nil
 		}
-		if newEdges := FairUpdate(updateOrders, deferredProposal.Graph, s.replicaCount, s.fFaulty, s.gamma); len(newEdges) > 0 {
+		if newEdges := FairUpdate(ctx, updateOrders, deferredProposal.Graph, s.replicaCount, s.fFaulty, s.gamma); len(newEdges) > 0 {
 			updates[proposalHeight] = newEdges
 		}
 	}
 	if len(deferred) == 0 && len(updateOrders) != 0 {
 		return nil
 	}
-	if len(dm.graph.Nodes) == 0 && len(updates) == 0 {
+	if ctx.Err() != nil || (len(dm.graph.Nodes) == 0 && len(updates) == 0) {
 		return nil
 	}
 	return &types.LeaderProposal{
@@ -953,6 +976,13 @@ func (s *OFOService) recomputeProposal(height uint64, batchOrders []*types.Repli
 }
 
 func (s *OFOService) VerifyProposal(proposal *types.LeaderProposal) bool {
+	ctx := context.Background()
+	if s.isLeader {
+		ctx = s.pipelineCtx
+	}
+	if ctx.Err() != nil {
+		return false
+	}
 	if proposal == nil || proposal.Proof == nil || proposal.Graph == nil {
 		log.Printf("THEMIS PROPOSAL VERIFICATION FAILED: replica=%d reason=malformed", s.ReplicaID)
 		return false
@@ -965,11 +995,17 @@ func (s *OFOService) VerifyProposal(proposal *types.LeaderProposal) bool {
 		return false
 	}
 	expected := s.recomputeProposal(proposal.BlockHeight, proposal.Proof.ReplicaOrders)
+	if ctx.Err() != nil {
+		return false
+	}
 	if expected == nil {
 		log.Printf("THEMIS PROPOSAL VERIFICATION FAILED: replica=%d height=%d reason=invalid-signed-inputs", s.ReplicaID, proposal.BlockHeight)
 		return false
 	}
-	if !graphEqual(proposal.Graph, expected.Graph) {
+	if !graphEqual(ctx, proposal.Graph, expected.Graph) {
+		if ctx.Err() != nil {
+			return false
+		}
 		log.Printf("THEMIS PROPOSAL VERIFICATION FAILED: replica=%d height=%d reason=graph", s.ReplicaID, proposal.BlockHeight)
 		return false
 	}
@@ -977,7 +1013,10 @@ func (s *OFOService) VerifyProposal(proposal *types.LeaderProposal) bool {
 		log.Printf("THEMIS PROPOSAL VERIFICATION FAILED: replica=%d height=%d reason=states", s.ReplicaID, proposal.BlockHeight)
 		return false
 	}
-	if !updatesEqual(proposal.Updates, expected.Updates) {
+	if !updatesEqual(ctx, proposal.Updates, expected.Updates) {
+		if ctx.Err() != nil {
+			return false
+		}
 		log.Printf("THEMIS PROPOSAL VERIFICATION FAILED: replica=%d height=%d reason=updates", s.ReplicaID, proposal.BlockHeight)
 		return false
 	}
@@ -1044,7 +1083,7 @@ func (s *OFOService) commitVerifiedProposal(proposal *types.LeaderProposal) bool
 		dm.txStates = deferredProposal.TxStates
 		segment := dm.ComputeFairOrder()
 		if len(segment) != len(deferredProposal.Graph.Nodes) {
-			sccs := tarjanSCC(deferredProposal.Graph)
+			sccs := tarjanSCC(context.Background(), deferredProposal.Graph)
 			sizes := make([]int, len(sccs))
 			solids := make([]int, len(sccs))
 			for i, component := range sccs {
@@ -1106,7 +1145,7 @@ func cloneGraph(graph *types.DependencyGraph) *types.DependencyGraph {
 	return clone
 }
 
-func graphEqual(left, right *types.DependencyGraph) bool {
+func graphEqual(ctx context.Context, left, right *types.DependencyGraph) bool {
 	if left == nil || right == nil || len(left.Nodes) != len(right.Nodes) {
 		return left == nil && right == nil
 	}
@@ -1115,16 +1154,19 @@ func graphEqual(left, right *types.DependencyGraph) bool {
 			return false
 		}
 	}
-	return edgeMapsEqual(left, left.Edges, right.Edges) && edgeMapsEqual(right, right.Edges, left.Edges)
+	return edgeMapsEqual(ctx, left, left.Edges, right.Edges) && edgeMapsEqual(ctx, right, right.Edges, left.Edges)
 }
 
-func edgeMapsEqual(graph *types.DependencyGraph, left, right map[[32]byte][][32]byte) bool {
+func edgeMapsEqual(ctx context.Context, graph *types.DependencyGraph, left, right map[[32]byte][][32]byte) bool {
 	for from, targets := range left {
 		if !graph.Nodes[from] {
 			return false
 		}
 		seen := make(map[[32]byte]bool)
 		for _, to := range targets {
+			if ctx.Err() != nil {
+				return false
+			}
 			if !graph.Nodes[to] || seen[to] || !containsTx(right[from], to) {
 				return false
 			}
@@ -1158,23 +1200,26 @@ func txStatesEqual(left, right map[[32]byte]types.TxState) bool {
 	return true
 }
 
-func updatesEqual(left, right map[uint64]map[[32]byte][][32]byte) bool {
+func updatesEqual(ctx context.Context, left, right map[uint64]map[[32]byte][][32]byte) bool {
 	if len(left) != len(right) {
 		return false
 	}
 	for height, leftEdges := range left {
 		rightEdges, exists := right[height]
-		if !exists || !edgeMapsEqualForUpdates(leftEdges, rightEdges) || !edgeMapsEqualForUpdates(rightEdges, leftEdges) {
+		if !exists || !edgeMapsEqualForUpdates(ctx, leftEdges, rightEdges) || !edgeMapsEqualForUpdates(ctx, rightEdges, leftEdges) {
 			return false
 		}
 	}
 	return true
 }
 
-func edgeMapsEqualForUpdates(left, right map[[32]byte][][32]byte) bool {
+func edgeMapsEqualForUpdates(ctx context.Context, left, right map[[32]byte][][32]byte) bool {
 	for from, targets := range left {
 		seen := make(map[[32]byte]bool)
 		for _, to := range targets {
+			if ctx.Err() != nil {
+				return false
+			}
 			if seen[to] || !containsTx(right[from], to) {
 				return false
 			}

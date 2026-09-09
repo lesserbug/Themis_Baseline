@@ -2,6 +2,7 @@ package ofo
 
 import (
 	"SpeedFair_simplify/pkg/types"
+	"context"
 	"reflect"
 	"testing"
 )
@@ -89,7 +90,7 @@ func TestCondorcetCycleSCCAndHamiltonianOrder(t *testing.T) {
 	dm := NewDependencyManager()
 	dm.BuildGraphAndClassifyTxs(orders, n, f, gamma, nil)
 	dm.CutShadedTail()
-	sccs := tarjanSCC(dm.graph)
+	sccs := tarjanSCC(context.Background(), dm.graph)
 	if len(sccs) != 1 || len(sccs[0]) != 3 {
 		t.Fatalf("expected one three-transaction SCC, got %v", sccs)
 	}
@@ -115,7 +116,7 @@ func TestCondensationOrder(t *testing.T) {
 	dm := NewDependencyManager()
 	dm.graph = graph
 	dm.txStates = map[[32]byte]types.TxState{a: types.StateSolid, b: types.StateSolid, c: types.StateSolid, d: types.StateSolid}
-	sccs := tarjanSCC(graph)
+	sccs := tarjanSCC(context.Background(), graph)
 	condensation, _, info := dm.buildCondensationAndSCCInfo(sccs)
 	topo := topoSortCondensation(condensation)
 	if len(topo) != 2 || len(info[topo[0]].Txs) != 3 || len(info[topo[1]].Txs) != 1 || info[topo[1]].Txs[0] != d {
@@ -155,7 +156,7 @@ func TestFairUpdatePresenceThresholdAndDirection(t *testing.T) {
 		{ReplicaID: 4, OrderedTxs: [][32]byte{v, u}},
 		{ReplicaID: 5, OrderedTxs: [][32]byte{u}},
 	}
-	edges := FairUpdate(orders, graph, n, f, gamma)
+	edges := FairUpdate(context.Background(), orders, graph, n, f, gamma)
 	if !containsTx(edges[u], v) || containsTx(edges[v], u) {
 		t.Fatal("expected update edge u -> v")
 	}
@@ -163,7 +164,7 @@ func TestFairUpdatePresenceThresholdAndDirection(t *testing.T) {
 	for i := 3; i < 6; i++ {
 		orders[i].OrderedTxs = nil
 	}
-	if edges = FairUpdate(orders, graph, n, f, gamma); len(edges) != 0 {
+	if edges = FairUpdate(context.Background(), orders, graph, n, f, gamma); len(edges) != 0 {
 		t.Fatalf("a source below n-2f update presence must not create an edge: %v", edges)
 	}
 }
@@ -218,7 +219,7 @@ func TestHamiltonianCycleForStrongTournaments(t *testing.T) {
 				addEdge(graph, vertices[pair[1]], vertices[pair[0]])
 			}
 		}
-		if sccs := tarjanSCC(graph); len(sccs) != 1 {
+		if sccs := tarjanSCC(context.Background(), graph); len(sccs) != 1 {
 			continue
 		}
 		first := hamiltonianCycle(vertices, graph)
@@ -249,7 +250,7 @@ func TestHamiltonianCycleForStrongTournaments(t *testing.T) {
 				}
 			}
 		}
-		if len(tarjanSCC(graph)) != 1 {
+		if len(tarjanSCC(context.Background(), graph)) != 1 {
 			continue
 		}
 		if cycle := hamiltonianCycle(largeVertices, graph); len(cycle) != largeSize {

@@ -190,6 +190,9 @@ func (adapter *benchmarkHostingAdapter) Propose(ctx context.Context, proposal *t
 		return false
 	}
 	if !adapter.service.VerifyProposal(proposal) {
+		if ctx.Err() != nil {
+			return false
+		}
 		log.Printf("BENCHMARK LEADER REJECTED LOCAL CANDIDATE: height=%d", proposal.BlockHeight)
 		return false
 	}
