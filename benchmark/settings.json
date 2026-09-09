@@ -1,0 +1,45 @@
+{
+  "testbed": "themis",
+  "key": {
+    "name": "aws",
+    "path": ""
+  },
+  "port": 5000,
+  "repo": {
+    "name": "SpeedFair_simplify",
+    "url": "",
+    "branch": "master"
+  },
+  "instances": {
+    "type": "m5.xlarge",
+    "regions": [
+      "us-east-1"
+    ]
+  },
+  "benchmark": {
+    "local": {
+      "nodes": 7,
+      "faults": 1,
+      "gamma": 0.9,
+      "rate": 700,
+      "tx_size": 512,
+      "lo_interval": 150,
+      "lo_size": 200,
+      "duration": 20,
+      "runs": 1,
+      "offered_rate_tolerance": 0.02
+    },
+    "remote": {
+      "nodes": [7],
+      "faults": 1,
+      "gamma": 0.9,
+      "rate": [700],
+      "tx_size": 512,
+      "lo_interval": 150,
+      "lo_size": 200,
+      "duration": 60,
+      "runs": 1,
+      "offered_rate_tolerance": 0.02
+    }
+  }
+}
