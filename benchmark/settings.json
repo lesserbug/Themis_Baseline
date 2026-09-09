@@ -2,12 +2,12 @@
   "testbed": "themis",
   "key": {
     "name": "aws",
-    "path": ""
+    "path": "/home/ren/.ssh/mrv-aws"
   },
   "port": 5000,
   "repo": {
-    "name": "SpeedFair_simplify",
-    "url": "",
+    "name": "Themis_Baseline",
+    "url": "https://github.com/lesserbug/Themis_Baseline.git",
     "branch": "master"
   },
   "instances": {
@@ -30,10 +30,10 @@
       "offered_rate_tolerance": 0.02
     },
     "remote": {
-      "nodes": [7],
+      "nodes": [5],
       "faults": 1,
-      "gamma": 0.9,
-      "rate": [700],
+      "gamma": 0.95,
+      "rate": [100,300,500],
       "tx_size": 512,
       "lo_interval": 150,
       "lo_size": 200,
