@@ -1,0 +1,15 @@
+sample,stage,iterations,ns_per_op,bytes_per_op,allocs_per_op,process,seed,repeat,raw_log,workload_version
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,GraphCore,298,3944161.0,2331626.0,3161.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,LeaderBuildFull,272,5410360.0,3257312.0,3789.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,CandidateCheckCore,130,9516746.0,3331395.0,4590.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,FollowerVerifyFull,100,10444188.0,4257078.0,5217.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,CommitFinalizeFull,241,4789163.0,1223364.0,1094.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts,GraphCore,25353,51833.0,16536.0,93.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts,LeaderBuildFull,705,1585313.0,83169.0,290.0,1,7,1,raw-p1-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,GraphCore,366,3424267.0,2331622.0,3161.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,LeaderBuildFull,291,5123266.0,3257311.0,3788.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,CandidateCheckCore,145,8197228.0,3331388.0,4590.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,FollowerVerifyFull,116,9515844.0,4257075.0,5217.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle,CommitFinalizeFull,260,3927332.0,1223360.0,1094.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts,GraphCore,24908,47618.0,16536.0,93.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1
+n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts,LeaderBuildFull,786,1456316.0,83169.0,290.0,2,7,1,raw-p2-n10-seed7.log,themis-receipts-v1

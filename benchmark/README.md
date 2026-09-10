@@ -1,5 +1,9 @@
 # Themis ordering-layer baseline
 
+For single-machine construction/verification computation (without deployment),
+see [local microbenchmarks](MICROBENCHMARKS.md). These preserve native Themis
+boundaries and are separate from the hosting/throughput experiments below.
+
 Paper: *Themis: Fast, Strong Order-Fairness in Byzantine Consensus*,
 [ePrint 2021/1465](https://eprint.iacr.org/2021/1465), revision dated
 2022-11-29, linked from the author's CCS 2023 publication page. The implementation

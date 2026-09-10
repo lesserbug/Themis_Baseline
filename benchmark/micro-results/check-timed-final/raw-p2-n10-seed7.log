@@ -1,0 +1,13 @@
+goos: windows
+goarch: amd64
+pkg: SpeedFair_simplify/pkg/ofo
+cpu: AMD Ryzen 7 7840HS with Radeon 780M Graphics   
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle/GraphCore         	     366	   3424267 ns/op	 2331622 B/op	    3161 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle/LeaderBuildFull   	     291	   5123266 ns/op	 3257311 B/op	    3788 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle/CandidateCheckCore         	     145	   8197228 ns/op	 3331388 B/op	    4590 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle/FollowerVerifyFull         	     116	   9515844 ns/op	 4257075 B/op	    5217 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle/CommitFinalizeFull         	     260	   3927332 ns/op	 1223360 B/op	    1094 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts/GraphCore            	   24908	     47618 ns/op	   16536 B/op	      93 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts/LeaderBuildFull      	     786	   1456316 ns/op	   83169 B/op	     290 allocs/op
+PASS
+ok  	SpeedFair_simplify/pkg/ofo	12.774s

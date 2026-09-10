@@ -1,0 +1,30 @@
+goos: windows
+goarch: amd64
+pkg: SpeedFair_simplify/pkg/ofo
+cpu: AMD Ryzen 7 7840HS with Radeon 780M Graphics   
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/GraphCore         	       1	   2961600 ns/op	 2253096 B/op	    4426 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/GraphCore         	       1	   3001200 ns/op	 2253096 B/op	    4426 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/LeaderBuildFull   	       1	   4153200 ns/op	 3214232 B/op	    5213 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/LeaderBuildFull   	       1	   4228200 ns/op	 3214232 B/op	    5213 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/CandidateCheckCore         	       1	   4550400 ns/op	 3247000 B/op	    5696 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/CandidateCheckCore         	       1	   4455800 ns/op	 3247000 B/op	    5696 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/FollowerVerifyFull         	       1	   5899000 ns/op	 4208152 B/op	    6483 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/FollowerVerifyFull         	       1	   5761200 ns/op	 4208152 B/op	    6483 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/CommitFinalizeFull         	       1	   2377300 ns/op	 1391568 B/op	    2537 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/low_release/CommitFinalizeFull         	       1	   2278000 ns/op	 1391568 B/op	    2537 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/GraphCore                        	       1	   2885200 ns/op	 2331608 B/op	    3161 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/GraphCore                        	       1	   2813300 ns/op	 2331608 B/op	    3161 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/LeaderBuildFull                  	       1	   3780800 ns/op	 3257288 B/op	    3788 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/LeaderBuildFull                  	       1	   3792800 ns/op	 3257288 B/op	    3788 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/CandidateCheckCore               	       1	   4408500 ns/op	 3331352 B/op	    4589 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/CandidateCheckCore               	       1	   4442800 ns/op	 3331352 B/op	    4589 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/FollowerVerifyFull               	       1	   5055800 ns/op	 4257032 B/op	    5216 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/FollowerVerifyFull               	       1	   5062200 ns/op	 4257032 B/op	    5216 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/CommitFinalizeFull               	       1	   2230100 ns/op	 1223344 B/op	    1094 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/cycle/CommitFinalizeFull               	       1	   2273900 ns/op	 1223344 B/op	    1094 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/no_receipts/GraphCore                  	       1	     33800 ns/op	   16536 B/op	      93 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/no_receipts/GraphCore                  	       1	     37500 ns/op	   16536 B/op	      93 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/no_receipts/LeaderBuildFull            	       1	    816300 ns/op	   83168 B/op	     290 allocs/op
+BenchmarkThemisLocal/n=10/f=1/gamma=0.95/seed=1/history=24/cap=200/bytes=512/no_receipts/LeaderBuildFull            	       1	    798000 ns/op	   83168 B/op	     290 allocs/op
+PASS
+ok  	SpeedFair_simplify/pkg/ofo	0.920s

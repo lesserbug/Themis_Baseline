@@ -1,0 +1,93 @@
+[
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle",
+    "stage": "CandidateCheckCore",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 8197228.0,
+    "median_ns": 8856987.0,
+    "max_ns": 9516746.0,
+    "process_mean_ns": 8856987.0,
+    "process_cv": 0.10534509373195544,
+    "median_B_per_op": 3331391.5,
+    "median_allocs_per_op": 4590.0
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle",
+    "stage": "CommitFinalizeFull",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 3927332.0,
+    "median_ns": 4358247.5,
+    "max_ns": 4789163.0,
+    "process_mean_ns": 4358247.5,
+    "process_cv": 0.13982834713650005,
+    "median_B_per_op": 1223362.0,
+    "median_allocs_per_op": 1094.0
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle",
+    "stage": "FollowerVerifyFull",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 9515844.0,
+    "median_ns": 9980016.0,
+    "max_ns": 10444188.0,
+    "process_mean_ns": 9980016.0,
+    "process_cv": 0.06577527908510811,
+    "median_B_per_op": 4257076.5,
+    "median_allocs_per_op": 5217.0
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle",
+    "stage": "GraphCore",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 3424267.0,
+    "median_ns": 3684214.0,
+    "max_ns": 3944161.0,
+    "process_mean_ns": 3684214.0,
+    "process_cv": 0.09978263284874303,
+    "median_B_per_op": 2331624.0,
+    "median_allocs_per_op": 3161.0
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/cycle",
+    "stage": "LeaderBuildFull",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 5123266.0,
+    "median_ns": 5266813.0,
+    "max_ns": 5410360.0,
+    "process_mean_ns": 5266813.0,
+    "process_cv": 0.03854439378006599,
+    "median_B_per_op": 3257311.5,
+    "median_allocs_per_op": 3788.5
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts",
+    "stage": "GraphCore",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 47618.0,
+    "median_ns": 49725.5,
+    "max_ns": 51833.0,
+    "process_mean_ns": 49725.5,
+    "process_cv": 0.059938162164308,
+    "median_B_per_op": 16536.0,
+    "median_allocs_per_op": 93.0
+  },
+  {
+    "sample": "n=10/f=1/gamma=0.95/seed=7/history=24/cap=200/bytes=512/no_receipts",
+    "stage": "LeaderBuildFull",
+    "observations": 2,
+    "independent_processes": 2,
+    "min_ns": 1456316.0,
+    "median_ns": 1520814.5,
+    "max_ns": 1585313.0,
+    "process_mean_ns": 1520814.5,
+    "process_cv": 0.05997750116974889,
+    "median_B_per_op": 83169.0,
+    "median_allocs_per_op": 290.0
+  }
+]
