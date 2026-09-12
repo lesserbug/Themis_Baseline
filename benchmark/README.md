@@ -65,7 +65,7 @@ now match AUTIG's current defaults (`m5.xlarge`, `us-east-1`); deployment uses
 Go 1.22.12 on both sides. Keep client placement, replica count, faults, payload,
 duration and repetitions aligned when comparing results.
 
-Themis retains n=7, f=1, gamma=0.9: AUTIG's current n=5, f=1, gamma=0.9 does
+The local example uses n=7, f=1, gamma=0.9: n=5, f=1, gamma=0.9 does
 not satisfy Themis's strict n*(2*gamma-1)>4*f constraint. For a comparison using
 these Themis parameters, also configure AUTIG with seven replicas. This change
 does not edit AUTIG. Themis gamma is an all-replica premise, whereas AUTIG's
@@ -90,7 +90,53 @@ list size and proposal graph size still affect this implementation's cost.
 each collected batch contains n-f replica reports. Fairness batches arising
 from Condorcet cycles are a further, separate meaning of the word "batch".
 
+## Byzantine-count experiments
+
+`-f F` is the protocol fault bound. `-byzantine-count b` independently selects
+the last b replica IDs (`n-b` through `n-1`) to reverse their complete fresh
+and Update receipt orders. They still sign, send, verify and acknowledge normally.
+Omitting the CLI flag (default -1), or omitting/using null for `byzantine_count`
+in settings, preserves the old b=F behavior. Explicit zero selects no attackers.
+Require 0 <= b <= F; this flag does not change graph thresholds or hosting quorum.
+The fixed leader ID 0 stays honest in these experiments.
+
+`benchmark.local.byzantine_count` accepts one integer or null.
+`benchmark.remote.byzantine_count` accepts a list (or a scalar for one value).
+The remote matrix is expanded over nodes, rate and byzantine_count, with every
+combination validated before contacting AWS. The current remote settings use:
+
+```json
+"nodes": [20],
+"faults": 4,
+"gamma": 1.0,
+"byzantine_count": [0, 1, 2, 3, 4]
+```
+
+At these settings, n-F=16 evidence senders, n-2F=12 solid presence, edge threshold
+ceil(n*(1-gamma)+F+1)=5 and n-F=16 hosting acknowledgements all remain fixed.
+The collector accepts any first n-F valid distinct senders; a particular round
+need not include all b attackers. It does not wait for a fixed sender roster.
+Raw startup logs report `BENCHMARK FAULTS`; JSON records resolved
+`byzantine_count`, `attack_model=reverse`, and `fault_metadata`. Run IDs include b.
+
+This measures receipt-order reversal with an honest leader, not arbitrary
+Byzantine behavior, withholding, delay injection or complete BFT recovery.
+For comparison with UTIG's reversal-only experiment, use its
+`byzantine_lo_delay_ms=0`. A flat throughput curve is possible, especially below
+saturation; report latency, completion ratio and actual offered rate too.
+Keep n, F, gamma, workload and interval fixed while varying b. Different gamma
+semantics across the protocols still need to be stated.
+
 ## Minimal diagnostics and run identity
+
+`fab remote` prints setup/run progress, one compact result line (n, F, b,
+interval, repeat, target/actual input, TPS, completed-transaction latency,
+completion ratio and outstanding count), and the saved JSON path. It does not
+dump per-node states or diagnostics to the terminal. All JSON fields and raw
+node logs remain saved. Remote Git/build output is saved under
+`logs/build-<unique-id>/node<id>.log`; a failed build raises an error with that
+path. Benchmark failures and offered-rate warnings remain visible. `fab logs`
+is still the explicit command for printing detailed saved log data.
 
 Raw logs and result JSON now share a unique run ID including reporting interval;
 repeat sweeps do not overwrite raw logs. JSON retains `log_paths`, executable
@@ -129,16 +175,20 @@ keys simulate authentication cost, not real key isolation. Hosting BFT,
 view-change, SNARK-Themis and the optional early-solid-prefix optimization are
 outside this implementation's scope.
 
-## Unresolved paper interpretation
+## Paper weighting correction (2026-09-13)
 
-Partial-list pair weighting remains unchanged pending clarification. With
-n=5, f=1, gamma=1 and lists [A,B], [B,A], [A], [B], the current common-presence
-count yields two solid vertices without an edge, inconsistent with Lemma B.1.
-The lemma counts lists containing at least one of the pair, but the prose Weight
-notation does not explicitly define absent entries. No speculative absent-entry
-votes have been added, and capped-list omission must not be equated with
-non-receipt. This limitation prevents claiming complete paper fidelity for
-partial-receipt workloads; the benchmark fixes do not resolve it.
+The author's [dissertation, Ch. 6, printed p.138](https://mahimnakelkar.github.io/dissertation.pdf#page=156)
+explicitly includes an ordering vote A before B when only A is present.
+FairPropose and FairUpdate now count this vote; neither-transaction-present
+contributes nothing. Earlier versions counted only common-presence pairs.
+That was a correctness defect, not an inherent performance limitation of Themis.
+Regression counterexamples and an exhaustive two-transaction receipt check are
+in `pkg/ofo/paper_conformance_test.go`. Deferred test fixtures also now use
+receipt patterns that remain incomplete under the corrected definition.
+Old partial-receipt performance and microbenchmark results require reevaluation;
+do not merge measurements across this correction. Capped-list omission must
+still not be equated with non-receipt. This correction does not establish full
+HotStuff/protocol fidelity. See [the audit](THEMIS_PAPER_AUDIT_2026-09-13.md).
 
 Regression tests:
 

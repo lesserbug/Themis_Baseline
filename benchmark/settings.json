@@ -20,6 +20,7 @@
     "local": {
       "nodes": 7,
       "faults": 1,
+      "byzantine_count": null,
       "gamma": 0.9,
       "rate": 700,
       "tx_size": 512,
@@ -30,9 +31,10 @@
       "offered_rate_tolerance": 0.02
     },
     "remote": {
-      "nodes": [5],
-      "faults": 1,
-      "gamma": 0.95,
+      "nodes": [20],
+      "faults": 4,
+      "gamma": 1.0,
+      "byzantine_count": [0, 1, 2, 3, 4],
       "rate": [100,300,500],
       "tx_size": 512,
       "lo_interval": 150,

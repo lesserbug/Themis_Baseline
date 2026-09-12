@@ -342,14 +342,43 @@ func makeMicroFixture(tb testing.TB, c microConfig, scenario string) *microFixtu
 	}
 	var blocker []*types.Transaction
 	if history > 0 {
-		blocker = newTxs(3)
+		// Keep a genuinely unspecified shaded pair: both appear in 2(t-1)
+		// lists, split evenly between their two orders. Neither weight reaches t.
+		// Increasing-presence bridge vertices give both a path to a solid node.
+		// The old disjoint-receipt fixture incorrectly relied on ignoring absence.
+		pairPresence := 2 * (edgeThreshold(c.N, c.F, c.Gamma) - 1)
+		solidPresence := int(c.N - 2*c.F)
+		if pairPresence >= solidPresence {
+			tb.Fatal("micro blocker requires 2*(edge threshold-1) < n-2f")
+		}
+		counts := []int{pairPresence, pairPresence}
+		for count := pairPresence; count < solidPresence; {
+			count *= 2
+			if count > solidPresence {
+				count = solidPresence
+			}
+			counts = append(counts, count)
+		}
+		if history < len(counts) {
+			tb.Fatal("history too small for a paper-valid deferred blocker")
+		}
+		blocker = newTxs(len(counts))
+		// At equal directional weights the smaller transaction ID wins.
+		sort.Slice(blocker, func(i, j int) bool { return bytes.Compare(blocker[i].ID[:], blocker[j].ID[:]) < 0 })
 		lists := make([][]*types.Transaction, len(replicas))
 		for i := range lists {
-			lists[i] = []*types.Transaction{blocker[i%2], blocker[2]}
+			for j, count := range counts {
+				if i < count {
+					lists[i] = append(lists[i], blocker[j])
+				}
+			}
+			if i >= pairPresence/2 && i < pairPresence {
+				lists[i][0], lists[i][1] = lists[i][1], lists[i][0]
+			}
 		}
 		deliver(lists, false)
 		warmCommit()
-		for remaining := history - 3; remaining > 0; {
+		for remaining := history - len(blocker); remaining > 0; {
 			count := remaining
 			if count > c.ReceiptCap {
 				count = c.ReceiptCap
@@ -376,7 +405,13 @@ func makeMicroFixture(tb testing.TB, c microConfig, scenario string) *microFixtu
 	}
 	if release {
 		for i := range lists {
-			lists[i] = append([]*types.Transaction{blocker[1-i%2]}, lists[i]...)
+			var missing []*types.Transaction
+			for _, tx := range blocker {
+				if _, known := replicas[i].txPool[tx.ID]; !known {
+					missing = append(missing, tx)
+				}
+			}
+			lists[i] = append(missing, lists[i]...)
 		}
 	}
 	if scenario == "late_completed" {

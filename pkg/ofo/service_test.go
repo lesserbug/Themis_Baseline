@@ -151,8 +151,10 @@ func TestDeferredUpdateAndBatchUnspooling(t *testing.T) {
 	putKnownTransactions(service, u, v, solid, later)
 
 	firstOrders := map[uint64][][32]byte{
-		0: {u, solid}, 1: {u, solid}, 2: {u, solid},
-		3: {v, solid}, 4: {v, solid}, 5: {v, solid},
+		// Both shaded vertices occur four times, split 2:2, below the
+		// edge threshold in both directions. Each precedes the solid vertex.
+		0: {u, v, solid}, 1: {u, v, solid},
+		2: {v, u, solid}, 3: {v, u, solid}, 4: {solid},
 	}
 	first := service.buildProposal(signedOrders(t, auth, n, f, 1, firstOrders, nil))
 	if first == nil || IsTournament(first.Graph) || !service.CommitProposal(first) {
@@ -210,6 +212,38 @@ func TestFullReceiptListAndPoolRetention(t *testing.T) {
 	service.HandleMessage(network.Message{Payload: tx})
 	if _, ok := service.txPool[tx.ID]; !ok {
 		t.Fatal("received transaction was silently dropped")
+	}
+}
+
+func TestMaliciousReplicaReversesFreshAndUpdateEvidence(t *testing.T) {
+	for _, malicious := range []bool{false, true} {
+		t.Run(fmt.Sprintf("malicious=%v", malicious), func(t *testing.T) {
+			net := &testNetwork{sent: make(chan network.Message, 1)}
+			auth := newTestOrderAuthenticator(20)
+			s, err := NewOFOService(19, 20, 4, 1, net, 200, 150, malicious, auth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(s.Stop)
+			a, b, c, d := testTx(1), testTx(2), testTx(3), testTx(4)
+			putKnownTransactions(s, a, b, c, d)
+			// Exercise both evidence lists; deferred state setup is not a commit.
+			s.deferredProposals[1] = &types.LeaderProposal{Graph: &types.DependencyGraph{
+				Nodes: map[[32]byte]bool{a: true, b: true}, Edges: make(map[[32]byte][][32]byte),
+			}}
+			s.generateAndSendOrders()
+			orders := (<-net.sent).Payload.(*types.ReplicaOrders)
+			fresh, update := [][32]byte{c, d}, [][32]byte{a, b}
+			if malicious {
+				fresh, update = [][32]byte{d, c}, [][32]byte{b, a}
+			}
+			if orders.Update == nil || !reflect.DeepEqual(orders.NewTxOrder.OrderedTxs, fresh) || !reflect.DeepEqual(orders.Update.OrderedTxs, update) {
+				t.Fatal("unexpected fresh/update receipt order")
+			}
+			if !s.validateReplicaOrders(orders) || s.fFaulty != 4 || s.replicaCount != 20 || s.gamma != 1 {
+				t.Fatal("attack changed evidence validity or protocol parameters")
+			}
+		})
 	}
 }
 

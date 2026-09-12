@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from decimal import Decimal
+from itertools import product
 from json import dump, dumps, load, loads
 from pathlib import Path
 import os
@@ -32,6 +33,7 @@ def _run_id(mode, parameters, run):
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     return (
         f"{mode}-n{parameters['nodes']}-f{parameters['faults']}"
+        f"-b{_byzantine_count(parameters)}"
         f"-r{parameters['rate']}-i{parameters['lo_interval']}"
         f"-run{run}-{timestamp}-{uuid4().hex[:8]}"
     )
@@ -67,6 +69,23 @@ def _build_local():
     )
 
 
+def _byzantine_count(parameters):
+    count = parameters.get("byzantine_count")
+    if count is None:
+        count = int(parameters["faults"])
+    if type(count) is not int or not 0 <= count <= int(parameters["faults"]):
+        raise RuntimeError("byzantine_count must be an integer between 0 and faults (or null to use faults)")
+    return count
+
+
+def _byzantine_values(matrix):
+    values = matrix.get("byzantine_count")
+    values = values if isinstance(values, list) else [values]
+    if not values:
+        raise RuntimeError("remote byzantine_count must be non-empty")
+    return values
+
+
 def _validate_parameters(parameters):
     n = int(parameters["nodes"])
     f = int(parameters["faults"])
@@ -77,6 +96,7 @@ def _validate_parameters(parameters):
         raise RuntimeError("Themis requires gamma_all in (1/2, 1]")
     if n * (2 * gamma - 1) <= 4 * f:
         raise RuntimeError("Themis requires n > 4f/(2*gamma_all-1)")
+    _byzantine_count(parameters)
     if int(parameters["tx_size"]) < 16:
         raise RuntimeError("tx_size must be at least 16 bytes")
     for name in ("rate", "lo_interval", "lo_size", "duration"):
@@ -106,6 +126,7 @@ def _command(parameters, node_ids, config="config.json", binary=None):
         "-config", config,
         "-nodes", ids,
         "-f", str(parameters["faults"]),
+        "-byzantine-count", str(_byzantine_count(parameters)),
         "-gamma", str(parameters["gamma"]),
         "-lo-interval", str(parameters["lo_interval"]),
         "-lo-size", str(parameters["lo_size"]),
@@ -174,10 +195,18 @@ def _parse_log(path):
         "log_paths": [str(Path(path).resolve())],
         "build_metadata": [loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE)],
         "diagnostics_samples": [loads(value) for value in re.findall(r"^THEMIS DIAGNOSTICS (\{[^\n]+\})$", text, re.MULTILINE)],
+        "fault_metadata": [
+            {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse"}
+            for f, b in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse$", text, re.MULTILINE)
+        ],
     }
 
 
 def _write_result(mode, parameters, run, metrics):
+    actual_byzantine = _byzantine_count(parameters)
+    for reported in metrics.get("fault_metadata", []):
+        if reported["faults"] != int(parameters["faults"]) or reported["byzantine_count"] != actual_byzantine:
+            raise RuntimeError("reported fault configuration differs from requested parameters")
     states = metrics["replica_states"]
     if set(states) != {str(i) for i in range(parameters["nodes"])} or len(set(states.values())) != 1:
         raise RuntimeError("replicas did not report the same final committed sequence, state and fragment")
@@ -222,6 +251,8 @@ def _write_result(mode, parameters, run, metrics):
         "run": run,
         **parameters,
         **metrics,
+        "byzantine_count": actual_byzantine,
+        "attack_model": "reverse",
     }
     result["run_id"] = parameters.get("run_id") or _run_id(mode, parameters, run)
     filename = result["run_id"] + ".json"
@@ -236,19 +267,32 @@ def _write_result(mode, parameters, run, metrics):
             "use actual_offered_rate for load plots and inspect generator capacity.",
             file=sys.stderr,
         )
-    print(dumps(result, indent=2))
+    latency = result.get("mean_completed_transaction_latency_ms")
+    latency_text = "N/A" if latency is None else f"{latency:.2f}ms"
+    completion = result["finalized"] / result["submitted"] if result["submitted"] else 0.0
+    outstanding = result.get("outstanding", result["submitted"] - result["finalized"])
+    print(
+        f"RESULT n={result['nodes']} F={result['faults']} b={actual_byzantine} "
+        f"interval={result['lo_interval']}ms run={run} | "
+        f"target={configured_rate} offered={actual_rate:.2f} TPS={result['average_tps']:.2f} "
+        f"latency={latency_text} completion={completion:.2%} outstanding={outstanding}",
+        flush=True,
+    )
+    print(f"Saved: {RESULT_DIR / filename}", flush=True)
 
 
 def _local_parameters(settings):
     parameters = dict(settings["benchmark"]["local"])
     parameters.pop("runs", None)
+    parameters["byzantine_count"] = _byzantine_count(parameters)
     return parameters
 
 
-def _remote_parameters(matrix, nodes, rate):
+def _remote_parameters(matrix, nodes, rate, byzantine_count=None):
     return {
         "nodes": int(nodes),
         "faults": int(matrix["faults"]),
+        "byzantine_count": _byzantine_count({"faults": matrix["faults"], "byzantine_count": byzantine_count}),
         "gamma": float(matrix["gamma"]),
         "rate": int(rate),
         "tx_size": int(matrix["tx_size"]),
@@ -334,8 +378,10 @@ def _update_remote(records, settings, install_packages=False):
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", name):
         raise RuntimeError("repo.name contains unsupported shell characters")
     quoted_url, quoted_branch = shlex.quote(url), shlex.quote(branch)
+    build_logs = LOG_DIR / ("build-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "-" + uuid4().hex[:8])
+    build_logs.mkdir(parents=True, exist_ok=False)
 
-    def update(_, record):
+    def update(index, record):
         connection = _connection(record, settings)
         commands = []
         if install_packages:
@@ -354,9 +400,14 @@ def _update_remote(records, settings, install_packages=False):
                 f"cd {name} && export PATH=/usr/local/go/bin:$PATH && go build -o themis ./pkg",
             ]
         )
-        connection.run(" && ".join(commands), hide=False)
+        result = connection.run(" && ".join(commands), hide=not install_packages, warn=True)
+        path = build_logs / f"node{index}.log"
+        path.write_text(result.stdout + "\n--- stderr ---\n" + result.stderr, encoding="utf-8")
+        if not result.ok:
+            raise RuntimeError(f"remote build failed at node {index} (exit={result.exited}); see {path}")
 
     _parallel(records, update)
+    print(f"Build complete on {len(records)} nodes. Details: {build_logs}", flush=True)
 
 
 def _upload_remote(records, settings):
@@ -458,6 +509,10 @@ def _run_remote_once(records, settings, parameters, run):
         if replica_id != 0:
             metrics["log_paths"].append(str(path.resolve()))
             metrics["build_metadata"].extend(loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE))
+            metrics["fault_metadata"].extend(
+                {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse"}
+                for f, b in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse$", text, re.MULTILINE)
+            )
         metrics["replica_states"].update({
             replica: (seq, state, digest)
             for replica, seq, state, digest in re.findall(
@@ -512,26 +567,39 @@ def remote(ctx):
     matrix = settings["benchmark"]["remote"]
     nodes_values = [int(value) for value in matrix["nodes"]]
     rate_values = [int(value) for value in matrix["rate"]]
+    byzantine_values = _byzantine_values(matrix)
     runs = int(matrix.get("runs", 1))
     if not nodes_values or not rate_values or runs <= 0:
         raise RuntimeError("remote nodes/rate must be non-empty and runs must be positive")
+    # Validate the entire sweep before connecting to or rebuilding AWS hosts.
+    for nodes, rate, count in product(nodes_values, rate_values, byzantine_values):
+        _validate_parameters(_remote_parameters(matrix, nodes, rate, count))
     _require_repo(settings)
     available = _spread(_aws_records(settings), settings["instances"]["regions"])
     required = max(nodes_values)
     if len(available) < required:
         raise RuntimeError(f"need {required} running AWS instances, found {len(available)}")
     selected = available[:required]
+    total_runs = len(nodes_values) * len(rate_values) * len(byzantine_values) * runs
+    print(f"Preparing {required} nodes; {total_runs} runs. Per-node details will be saved to {LOG_DIR}", flush=True)
     _update_remote(selected, settings, install_packages=False)
+    completed_runs = 0
     for nodes in nodes_values:
         records = selected[:nodes]
         addresses = [f"{record['public']}:{settings['port']}" for record in records]
         _prepare_runtime(nodes, addresses)
         _upload_remote(records, settings)
-        for rate in rate_values:
-            parameters = _remote_parameters(matrix, nodes, rate)
-            _validate_parameters(parameters)
+        for rate, count in product(rate_values, byzantine_values):
+            parameters = _remote_parameters(matrix, nodes, rate, count)
             for run in range(1, runs + 1):
+                print(
+                    f"[{completed_runs + 1}/{total_runs}] n={nodes} F={parameters['faults']} "
+                    f"b={parameters['byzantine_count']} interval={parameters['lo_interval']}ms "
+                    f"target={rate} duration={parameters['duration']}s run={run}",
+                    flush=True,
+                )
                 _run_remote_once(records, settings, parameters, run)
+                completed_runs += 1
 
 
 @task

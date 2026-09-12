@@ -48,6 +48,18 @@ class OfferedRateResultTests(unittest.TestCase):
         self.assertAlmostEqual(result["offered_rate_relative_deviation"], 0.03885)
         self.assertFalse(result["offered_rate_within_tolerance"])
         self.assertIn("WARNING", warning)
+        self.assertEqual(result["byzantine_count"], 1)
+        self.assertEqual(result["attack_model"], "reverse")
+
+    def test_zero_attackers_is_recorded_and_mismatched_log_is_rejected(self):
+        self.parameters["byzantine_count"] = 0
+        self.metrics["fault_metadata"] = [{"faults": 1, "byzantine_count": 0}]
+        result, _ = self.write_result()
+        self.assertEqual(result["byzantine_count"], 0)
+        self.assertIn("-b0-", result["run_id"])
+        self.metrics["fault_metadata"][0]["byzantine_count"] = 1
+        with self.assertRaisesRegex(RuntimeError, "fault configuration"):
+            self.write_result()
 
     def test_saturated_finalization_does_not_fail_rate_check(self):
         self.metrics.update(submitted=19999, finalized=100)
@@ -123,6 +135,7 @@ class OfferedRateResultTests(unittest.TestCase):
 
     def test_diagnostics_and_build_metadata_survive_parsing(self):
         text = '''THEMIS BUILD {"revision":"abc", "modified":"false"}
+BENCHMARK FAULTS tolerated=1 byzantine=0 behavior=reverse
 THEMIS DIAGNOSTICS {"elapsed_seconds":1, "replica_id":0, "batch_queue":2}
 THEMIS DIAGNOSTICS {"elapsed_seconds":2, "replica_id":0, "batch_queue":3}
 Measurement Duration: 2s
@@ -144,6 +157,62 @@ Completion Ratio: 0.99
         self.assertEqual(result["build_metadata"][0]["revision"], "abc")
         self.assertEqual([sample["batch_queue"] for sample in result["diagnostics_samples"]], [2, 3])
         self.assertEqual(result["average_tps"], 99)
+        self.assertEqual(result["fault_metadata"], [{"faults": 1, "byzantine_count": 0, "attack_model": "reverse"}])
+
+
+class ByzantineSweepTests(unittest.TestCase):
+    def setUp(self):
+        self.matrix = {
+            "nodes": [20], "faults": 4, "gamma": 1.0,
+            "byzantine_count": [0, 1, 2, 3, 4], "rate": [100],
+            "tx_size": 512, "duration": 4, "runs": 1,
+            "lo_interval": 150, "lo_size": 200, "offered_rate_tolerance": .02,
+        }
+
+    def test_command_keeps_f_fixed_through_sweep(self):
+        for b in fabfile._byzantine_values(self.matrix):
+            p = fabfile._remote_parameters(self.matrix, 20, 100, b)
+            fabfile._validate_parameters(p)
+            command = fabfile._command(p, [19])
+            self.assertEqual(command[command.index("-f") + 1], "4")
+            self.assertEqual(command[command.index("-byzantine-count") + 1], str(b))
+            self.assertIn(f"-f4-b{b}-", fabfile._run_id("remote", p, 1))
+
+    def test_legacy_and_explicit_zero(self):
+        for count, expected in [(None, 4), (0, 0), (4, 4)]:
+            self.assertEqual(fabfile._byzantine_count({"faults": 4, "byzantine_count": count}), expected)
+        self.assertEqual(fabfile._byzantine_count({"faults": 4}), 4)
+        self.assertEqual(fabfile._byzantine_values({}), [None])
+        self.assertEqual(fabfile._byzantine_values({"byzantine_count": 0}), [0])
+        local = {**self.matrix, "nodes": 20, "rate": 100, "byzantine_count": 0}
+        self.assertEqual(fabfile._local_parameters({"benchmark": {"local": local}})["byzantine_count"], 0)
+
+    def test_invalid_counts_are_rejected(self):
+        for count in [-1, 5, 1.5, True, "2", []]:
+            with self.subTest(count=count), self.assertRaisesRegex(RuntimeError, "byzantine_count"):
+                fabfile._byzantine_count({"faults": 4, "byzantine_count": count})
+        with self.assertRaisesRegex(RuntimeError, "non-empty"):
+            fabfile._byzantine_values({"byzantine_count": []})
+
+    def test_remote_dispatches_every_count_and_validates_before_aws(self):
+        settings = {"benchmark": {"remote": self.matrix}, "port": 5000, "instances": {"regions": ["test"]}}
+        records = [{"public": "127.0.0.1"} for _ in range(20)]
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(patch.object(fabfile, "_settings", return_value=settings))
+            stack.enter_context(patch.object(fabfile, "_require_repo"))
+            aws = stack.enter_context(patch.object(fabfile, "_aws_records", return_value=records))
+            stack.enter_context(patch.object(fabfile, "_spread", return_value=records))
+            for name in ("_update_remote", "_prepare_runtime", "_upload_remote"):
+                stack.enter_context(patch.object(fabfile, name))
+            run = stack.enter_context(patch.object(fabfile, "_run_remote_once"))
+            fabfile.remote.body(None)
+            self.assertEqual([call.args[2]["byzantine_count"] for call in run.call_args_list], list(range(5)))
+            self.assertTrue(all(call.args[2]["faults"] == 4 for call in run.call_args_list))
+            aws.reset_mock()
+            self.matrix["byzantine_count"] = [0, 5]
+            with self.assertRaisesRegex(RuntimeError, "byzantine_count"):
+                fabfile.remote.body(None)
+            aws.assert_not_called()
 
 
 if __name__ == "__main__":

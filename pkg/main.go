@@ -337,16 +337,17 @@ type Config struct {
 
 func main() {
 	var (
-		configFile  = flag.String("config", "config.json", "JSON config file for node addresses")
-		nodeList    = flag.String("nodes", "", "Comma-separated list of node IDs to run on this instance")
-		cpuProfile  = flag.Bool("cpuprofile", false, "Enable CPU profiling for this instance")
-		faultCount  = flag.Uint64("f", 1, "Number of tolerated faulty replicas")
-		gamma       = flag.Float64("gamma", 0.90, "Fairness parameter gamma")
-		loInterval  = flag.Int("lo-interval", 150, "Interval in milliseconds for generating local orders")
-		loSize      = flag.Int("lo-size", 200, "Compatibility flag; Themis sends complete unproposed receipt lists")
-		txRate      = flag.Int("tx-rate", 7000, "Transaction submission rate (tx/s)")
-		txSize      = flag.Int("tx-size", 512, "Canonical transaction size in bytes (minimum 16)")
-		simDuration = flag.Int("sim-duration", 30, "Simulation duration in seconds")
+		configFile     = flag.String("config", "config.json", "JSON config file for node addresses")
+		nodeList       = flag.String("nodes", "", "Comma-separated list of node IDs to run on this instance")
+		cpuProfile     = flag.Bool("cpuprofile", false, "Enable CPU profiling for this instance")
+		faultCount     = flag.Uint64("f", 1, "Number of tolerated faulty replicas")
+		gamma          = flag.Float64("gamma", 0.90, "Fairness parameter gamma")
+		loInterval     = flag.Int("lo-interval", 150, "Interval in milliseconds for generating local orders")
+		loSize         = flag.Int("lo-size", 200, "Compatibility flag; Themis sends complete unproposed receipt lists")
+		byzantineCount = flag.Int64("byzantine-count", -1, "Actual malicious ordering replicas (default: f; must be between 0 and f)")
+		txRate         = flag.Int("tx-rate", 7000, "Transaction submission rate (tx/s)")
+		txSize         = flag.Int("tx-size", 512, "Canonical transaction size in bytes (minimum 16)")
+		simDuration    = flag.Int("sim-duration", 30, "Simulation duration in seconds")
 	)
 	flag.Parse()
 	if *txSize < 16 {
@@ -371,12 +372,17 @@ func main() {
 	if err := ofo.ValidateThemisParameters(totalNodesFromConfig, *faultCount, *gamma); err != nil {
 		log.Fatal(err)
 	}
+	actualByzantine, err := resolveByzantineCount(totalNodesFromConfig, *faultCount, *byzantineCount)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Printf("--- Starting Themis Protocol Simulation ---\n")
 	printBenchmarkBuild()
 	fmt.Printf("Nodes on this instance: %v\n", nodesToRun)
 	fmt.Printf("System params: N=%d, F=%d, GammaAll=%.2f (Themis all-replica premise)\n", totalNodesFromConfig, *faultCount, *gamma)
-	fmt.Printf("Malicious replicas are IDs >= %d\n", totalNodesFromConfig-*faultCount)
+	fmt.Printf("BENCHMARK FAULTS tolerated=%d byzantine=%d behavior=reverse\n", *faultCount, actualByzantine)
+	fmt.Printf("Malicious replicas are IDs >= %d (count=%d)\n", totalNodesFromConfig-actualByzantine, actualByzantine)
 	fmt.Printf("Workload params: TxRate=%d/s, TxSize=%dB, LO-Interval=%dms, LO-Size=%d (inactive compatibility field; complete lists)\n", *txRate, *txSize, *loInterval, *loSize)
 	fmt.Printf("Simulation duration: %d seconds\n\n", *simDuration)
 
@@ -391,16 +397,16 @@ func main() {
 		cancel()
 	}()
 
-	runDistributedMode(ctx, nodesToRun, config, totalNodesFromConfig, *faultCount, *gamma, *loInterval, *loSize, *txRate, *txSize, *simDuration)
+	runDistributedMode(ctx, nodesToRun, config, totalNodesFromConfig, *faultCount, actualByzantine, *gamma, *loInterval, *loSize, *txRate, *txSize, *simDuration)
 }
 
-func runDistributedMode(rootCtx context.Context, nodeIDs []uint64, config map[uint64]string, totalNodes, faultCount uint64, gamma float64, loIntervalMs, loSize, txRate, txSize, simDuration int) {
+func runDistributedMode(rootCtx context.Context, nodeIDs []uint64, config map[uint64]string, totalNodes, faultCount, byzantineCount uint64, gamma float64, loIntervalMs, loSize, txRate, txSize, simDuration int) {
 	ctx, cancel := context.WithCancel(rootCtx)
 	defer cancel()
 	var wg sync.WaitGroup
 	services := make(map[uint64]*ofo.OFOService)
 	var servicesMu sync.Mutex
-	maliciousThresholdID := totalNodes - faultCount
+	maliciousThresholdID := totalNodes - byzantineCount
 	auth := newBenchmarkOrderAuthenticator(totalNodes, nodeIDs)
 	experimentStart := make(chan struct{})
 	submissionDone := make(chan struct{})

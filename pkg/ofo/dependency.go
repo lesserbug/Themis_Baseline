@@ -148,6 +148,16 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 	}
 	for _, order := range filteredOrders {
 		txList := order.OrderedTxs
+		present := make(map[[32]byte]bool, len(txList))
+		for _, tx := range txList {
+			present[tx] = true
+		}
+		var absent [][32]byte
+		for tx := range dm.graph.Nodes {
+			if !present[tx] {
+				absent = append(absent, tx)
+			}
+		}
 		for i := 0; i < len(txList); i++ {
 			if dm.ctx.Err() != nil {
 				return false
@@ -161,6 +171,11 @@ func (dm *DependencyManager) BuildGraphAndClassifyTxs(
 				if _, ok := dm.graph.Nodes[tx2]; !ok {
 					continue
 				}
+				dm.weights[tx1][tx2]++
+			}
+			// Themis Weight includes a receipt of tx1 when tx2 is absent.
+			// See Kelkar's dissertation, Ch. 6, "Replica ordering notation".
+			for _, tx2 := range absent {
 				dm.weights[tx1][tx2]++
 			}
 		}
@@ -382,18 +397,18 @@ func FairUpdate(
 			for v := range vMap {
 				posU, okU := txPos[u]
 				posV, okV := txPos[v]
-				if okU && okV {
+				// A present transaction precedes an absent one; if both are
+				// absent, this replica contributes no vote in either direction.
+				if okU && (!okV || posU < posV) {
 					if weights[u] == nil {
 						weights[u] = make(map[[32]byte]int)
 					}
+					weights[u][v]++
+				} else if okV {
 					if weights[v] == nil {
 						weights[v] = make(map[[32]byte]int)
 					}
-					if posU < posV {
-						weights[u][v]++
-					} else {
-						weights[v][u]++
-					}
+					weights[v][u]++
 				}
 			}
 		}
