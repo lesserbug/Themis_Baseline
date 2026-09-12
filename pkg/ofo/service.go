@@ -558,6 +558,8 @@ type OFOService struct {
 	loInterval               time.Duration
 	auth                     types.OrderAuthenticator
 	proposalSink             func(*types.LeaderProposal) bool
+	benchmarkCounters        benchmarkCounters
+	benchmarkFailureOnce     sync.Once
 }
 
 func NewOFOService(id, n, f uint64, gamma float64, net network.NetworkInterface, loSize int, loIntervalMs int, malicious bool, auth types.OrderAuthenticator) (*OFOService, error) {
@@ -566,6 +568,9 @@ func NewOFOService(id, n, f uint64, gamma float64, net network.NetworkInterface,
 	}
 	if auth == nil {
 		return nil, fmt.Errorf("Themis requires an order authenticator")
+	}
+	if loIntervalMs <= 0 {
+		return nil, fmt.Errorf("Themis reporting interval must be positive")
 	}
 	s := &OFOService{
 		ReplicaID:               id,
@@ -660,9 +665,21 @@ func (s *OFOService) handleMessage(msg network.Message) {
 		s.committedMu.RUnlock()
 	case *types.ReplicaOrders:
 		if s.isLeader && s.replicaOrdersChan != nil && msg.From == payload.ReplicaID {
+			if s.pipelineCtx.Err() != nil {
+				return
+			}
 			select {
 			case s.replicaOrdersChan <- payload:
 			case <-s.pipelineCtx.Done():
+			default:
+				// A blocking enqueue here can prevent the single network worker
+				// from delivering the verification ACK that the proposer awaits.
+				// Fail this measurement rather than silently discard evidence in
+				// a valid run or introduce a new protocol scheduling policy.
+				s.benchmarkFailureOnce.Do(func() {
+					log.Printf("BENCHMARK INVALID: evidence queue exhausted at replica=%d evidence_queue=%d batch_queue=%d", s.ReplicaID, len(s.replicaOrdersChan), len(s.batchReadyChan))
+					s.pipelineCancel()
+				})
 			}
 		}
 	case *types.LeaderProposal:
@@ -746,6 +763,9 @@ func (s *OFOService) generateAndSendOrders() {
 		update = &types.UpdateOrder{OrderedTxs: orderedTxHashes}
 	}
 
+	s.benchmarkCounters.listCount.Add(1)
+	s.benchmarkCounters.listIDs.Add(uint64(len(batchTxHashes)))
+	benchmarkMax(&s.benchmarkCounters.listMax, uint64(len(batchTxHashes)))
 	s.localOrderSequence++
 	sequence := s.localOrderSequence
 	newTxOrder := &types.LocalOrder{ReplicaID: s.ReplicaID, Sequence: sequence, OrderedTxs: batchTxHashes}
@@ -846,6 +866,7 @@ func (s *OFOService) runCollectorStage() {
 				return
 			}
 			if !s.validateReplicaOrders(order) {
+				s.benchmarkCounters.collectorRejected.Add(1)
 				continue
 			}
 			if previous := pending[order.ReplicaID]; previous == nil || order.Sequence > previous.Sequence {
@@ -859,6 +880,7 @@ func (s *OFOService) runCollectorStage() {
 				sort.Slice(batch, func(i, j int) bool { return batch[i].ReplicaID < batch[j].ReplicaID })
 				select {
 				case s.batchReadyChan <- batch:
+					s.benchmarkCounters.batchesQueued.Add(1)
 				case <-s.pipelineCtx.Done():
 					return
 				}
@@ -885,13 +907,27 @@ func (s *OFOService) runProposerStage() {
 				continue
 			}
 
+			started := time.Now()
 			proposal := s.buildProposal(batchOrders)
+			s.benchmarkCounters.buildCount.Add(1)
+			elapsed := uint64(time.Since(started))
+			s.benchmarkCounters.buildNS.Add(elapsed)
+			benchmarkMax(&s.benchmarkCounters.buildMaxNS, elapsed)
+			if proposal == nil {
+				// Includes empty/no-progress inputs, invalidated queued evidence,
+				// and cancellation. It is not a count of correctness failures.
+				s.benchmarkCounters.buildNil.Add(1)
+			}
 			if proposal == nil || s.proposalSink == nil || s.pipelineCtx.Err() != nil {
 				continue
 			}
+			started = time.Now()
 			if s.proposalSink(proposal) {
+				s.benchmarkCounters.proposalsAccepted.Add(1)
 				s.lastProposedOrderSize = len(proposal.Graph.Nodes)
 			}
+			s.benchmarkCounters.hostingCount.Add(1)
+			s.benchmarkCounters.hostingNS.Add(uint64(time.Since(started)))
 		}
 	}
 }

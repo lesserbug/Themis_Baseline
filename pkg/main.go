@@ -302,6 +302,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"runtime/pprof"
 	"strconv"
 	"strings"
@@ -372,10 +373,11 @@ func main() {
 	}
 
 	fmt.Printf("--- Starting Themis Protocol Simulation ---\n")
+	printBenchmarkBuild()
 	fmt.Printf("Nodes on this instance: %v\n", nodesToRun)
 	fmt.Printf("System params: N=%d, F=%d, GammaAll=%.2f (Themis all-replica premise)\n", totalNodesFromConfig, *faultCount, *gamma)
 	fmt.Printf("Malicious replicas are IDs >= %d\n", totalNodesFromConfig-*faultCount)
-	fmt.Printf("Workload params: TxRate=%d/s, TxSize=%dB, LO-Interval=%dms, LO-Size=%d\n", *txRate, *txSize, *loInterval, *loSize)
+	fmt.Printf("Workload params: TxRate=%d/s, TxSize=%dB, LO-Interval=%dms, LO-Size=%d (inactive compatibility field; complete lists)\n", *txRate, *txSize, *loInterval, *loSize)
 	fmt.Printf("Simulation duration: %d seconds\n\n", *simDuration)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -750,6 +752,7 @@ func monitorSystem(ctx context.Context, services map[uint64]*ofo.OFOService, ser
 		select {
 		case <-ticker.C:
 			finalized, avgLatency, latencySamples := leaderService.GetMeasurementStats()
+			printBenchmarkDiagnostics(leaderService, time.Since(startTime))
 			submitted := atomic.LoadInt32(submittedCounter)
 			elapsed := time.Since(startTime).Seconds()
 			if elapsed < 1 {
@@ -769,10 +772,36 @@ func monitorSystem(ctx context.Context, services map[uint64]*ofo.OFOService, ser
 				return
 			}
 			finalized, avgLatency, samples := leaderService.GetMeasurementStats()
+			printBenchmarkDiagnostics(leaderService, time.Since(startTime))
 			printFinalReport(deadline.Sub(startTime), finalized, atomic.LoadInt32(submittedCounter), atomic.LoadInt64(failedSendCounter), avgLatency, samples)
 			return
 		}
 	}
+}
+
+func printBenchmarkBuild() {
+	metadata := map[string]string{"revision": "unknown", "modified": "unknown"}
+	if info, ok := debug.ReadBuildInfo(); ok {
+		metadata["go_version"] = info.GoVersion
+		for _, setting := range info.Settings {
+			switch setting.Key {
+			case "vcs.revision":
+				metadata["revision"] = setting.Value
+			case "vcs.modified":
+				metadata["modified"] = setting.Value
+			}
+		}
+	}
+	data, _ := json.Marshal(metadata)
+	fmt.Printf("THEMIS BUILD %s\n", data)
+}
+
+func printBenchmarkDiagnostics(service *ofo.OFOService, elapsed time.Duration) {
+	data, _ := json.Marshal(struct {
+		ElapsedSeconds float64 `json:"elapsed_seconds"`
+		ofo.BenchmarkDiagnostics
+	}{elapsed.Seconds(), service.GetBenchmarkDiagnostics()})
+	fmt.Printf("\nTHEMIS DIAGNOSTICS %s\n", data)
 }
 
 func printFinalReport(duration time.Duration, finalizedCount int, totalSubmitted int32, failedSends int64, avgLatency time.Duration, latencySamples int64) {

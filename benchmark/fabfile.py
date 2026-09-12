@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from decimal import Decimal
-from json import dump, dumps, load
+from json import dump, dumps, load, loads
 from pathlib import Path
 import os
 import re
@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import time
+from uuid import uuid4
 
 import boto3
 from botocore.exceptions import ClientError
@@ -24,6 +25,16 @@ RUNTIME_DIR = BENCHMARK_DIR / ".runtime"
 LOG_DIR = BENCHMARK_DIR / "logs"
 RESULT_DIR = BENCHMARK_DIR / "results"
 GO_VERSION = "1.22.12"
+
+
+def _run_id(mode, parameters, run):
+    """One identity shared by raw logs and the result, including repeat sweeps."""
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    return (
+        f"{mode}-n{parameters['nodes']}-f{parameters['faults']}"
+        f"-r{parameters['rate']}-i{parameters['lo_interval']}"
+        f"-run{run}-{timestamp}-{uuid4().hex[:8]}"
+    )
 
 
 def _settings():
@@ -160,6 +171,9 @@ def _parse_log(path):
                 r"BENCHMARK STATE replica=(\d+) seq=(\d+) state=([0-9a-f]{64}) fragment=([0-9a-f]{64})", text
             )
         },
+        "log_paths": [str(Path(path).resolve())],
+        "build_metadata": [loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE)],
+        "diagnostics_samples": [loads(value) for value in re.findall(r"^THEMIS DIAGNOSTICS (\{[^\n]+\})$", text, re.MULTILINE)],
     }
 
 
@@ -209,11 +223,9 @@ def _write_result(mode, parameters, run, metrics):
         **parameters,
         **metrics,
     }
-    filename = (
-        f"{mode}-n{parameters['nodes']}-f{parameters['faults']}"
-        f"-r{parameters['rate']}-run{run}-{timestamp.strftime('%Y%m%dT%H%M%SZ')}.json"
-    )
-    with (RESULT_DIR / filename).open("w", encoding="utf-8") as target:
+    result["run_id"] = parameters.get("run_id") or _run_id(mode, parameters, run)
+    filename = result["run_id"] + ".json"
+    with (RESULT_DIR / filename).open("x", encoding="utf-8") as target:
         dump(result, target, indent=2)
     if not rate_within_tolerance:
         deviation = "undefined (zero configured rate)" if relative_deviation is None else f"{relative_deviation:.2%}"
@@ -361,6 +373,7 @@ def _upload_remote(records, settings):
 
 
 def _run_remote_once(records, settings, parameters, run):
+    parameters = dict(parameters, run_id=_run_id("remote", parameters, run))
     name = settings["repo"]["name"]
 
     def start(replica_id, record):
@@ -407,10 +420,7 @@ def _run_remote_once(records, settings, parameters, run):
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     def download(replica_id, record):
-        local = LOG_DIR / (
-            f"remote-n{parameters['nodes']}-r{parameters['rate']}"
-            f"-run{run}-node{replica_id}.log"
-        )
+        local = LOG_DIR / f"{parameters['run_id']}-node{replica_id}.log"
         _connection(record, settings).get(
             f"{name}/.benchmark/node.log", local=str(local)
         )
@@ -427,9 +437,7 @@ def _run_remote_once(records, settings, parameters, run):
         _parallel(records, cleanup)
         raise RuntimeError("remote Themis did not exit before timeout; logs were downloaded")
 
-    leader_log = LOG_DIR / (
-        f"remote-n{parameters['nodes']}-r{parameters['rate']}-run{run}-node0.log"
-    )
+    leader_log = LOG_DIR / f"{parameters['run_id']}-node0.log"
     metrics = _parse_log(leader_log)
     aggregate_keys = (
         "locally_failed_local_order_send_attempts",
@@ -443,13 +451,13 @@ def _run_remote_once(records, settings, parameters, run):
     for key in aggregate_keys:
         metrics[key] = 0
     for replica_id in range(parameters["nodes"]):
-        path = LOG_DIR / (
-            f"remote-n{parameters['nodes']}-r{parameters['rate']}"
-            f"-run{run}-node{replica_id}.log"
-        )
+        path = LOG_DIR / f"{parameters['run_id']}-node{replica_id}.log"
         text = path.read_text(encoding="utf-8", errors="replace")
         if any(marker in text for marker in ("BENCHMARK INVALID", "panic:")):
             raise RuntimeError(f"{path} reports a failed benchmark")
+        if replica_id != 0:
+            metrics["log_paths"].append(str(path.resolve()))
+            metrics["build_metadata"].extend(loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE))
         metrics["replica_states"].update({
             replica: (seq, state, digest)
             for replica, seq, state, digest in re.findall(
@@ -481,8 +489,9 @@ def local(ctx):
     if runs <= 0:
         raise RuntimeError("local runs must be positive")
     for run in range(1, runs + 1):
-        log = LOG_DIR / f"local-run{run}.log"
-        with log.open("w", encoding="utf-8") as output:
+        parameters = dict(parameters, run_id=_run_id("local", parameters, run))
+        log = LOG_DIR / f"{parameters['run_id']}.log"
+        with log.open("x", encoding="utf-8") as output:
             completed = subprocess.run(
                 _command(parameters, range(parameters["nodes"])),
                 cwd=RUNTIME_DIR,
