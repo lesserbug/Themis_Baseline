@@ -1,0 +1,58 @@
+{
+  "status": "complete",
+  "recorded_utc": "2026-09-14T06:34:04.509920+00:00",
+  "commit": "e679a8976ec718cafa7b4e6ad04a08624b2e5371",
+  "go": "go version go1.24.5 windows/amd64",
+  "n": 10,
+  "F": 2,
+  "gamma": 1,
+  "b": [
+    0,
+    1,
+    2
+  ],
+  "ratios": [
+    0,
+    0.1,
+    1,
+    10,
+    100
+  ],
+  "seeds": [
+    1,
+    7,
+    19
+  ],
+  "transactions": 1000,
+  "GOMAXPROCS": 1,
+  "selected_senders": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "attack": "native full unproposed-list reversal; last b replicas; all b adopted",
+  "input_directory": "D:/Work/go/workplace/code/utig/benchmark/results/ordering-1000-20260913",
+  "payload_adapter": "Themis receives length(16)||AUTIG payload, 24 bytes, preserving original transaction IDs",
+  "execution": "all 10 profiles received and signed; one native proposal; leader and one follower commit, follower independently verifies; no transport or hosting consensus",
+  "fairness_oracle": "Paper III.1 gamma*n=10 original receivers; same-SCC relaxation independently checked through original honest cycle-link support >=1; output adjacent-link support >=1",
+  "source_sha256": {
+    "pkg/ofo/ordering_replay_test.go": "9e61d710af54163ea0d6c02cfc5514ae2f2f171397b503f566fb00c52a2e9a57",
+    "pkg/ofo/service.go": "db8ca30de696ddc2fffe04837d0cb9050fb5e0699b2142d8f7bf58b09745f697",
+    "pkg/ofo/dependency.go": "205218cf4515396e8af9b0509ab423467d0adae5d2a188671533bfe94771568e",
+    "pkg/types/type.go": "9a9f94456af5666bafe16280cfeb47ab3e24f76209e8e0e19aa0e64e7173038a"
+  },
+  "command": "go test ./pkg/ofo -run ^TestThemisOrderingReplay$ -count=1 -v -timeout=60m -args -ordering-replay-input=D:/Work/go/workplace/code/utig/benchmark/results/ordering-1000-20260913 -ordering-replay-output=D:/Work/go/workplace/code/SpeedFair_simplify/benchmark/ordering-results/20260914-native-replay-final/measurements.jsonl",
+  "completed_utc": "2026-09-14T06:43:05.546121+00:00",
+  "cases": 45,
+  "test_elapsed_seconds": 427.939,
+  "all_completed": true,
+  "violations": 0,
+  "cycle_witness_violations": 0,
+  "adjacency_violations": 0,
+  "raw_sha256": "fac7846c5538e7c3ebd02030f1ebad01e33c02747c423f38395be17f09f5aa58"
+}

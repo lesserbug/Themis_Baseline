@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build1253004174\b001\ofo.test.exe2026-09-14 14:41:01.6721321 +1000 AEST
+Type: cpu
+Time: 2026-09-14 14:41:03 AEST
+Duration: 5.20s, Total samples = 4.89s (94.12%)
+Showing nodes accounting for 3.57s, 73.01% of 4.89s total
+Dropped 144 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 81
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      4.78s 97.75%  SpeedFair_simplify/pkg/ofo.TestThemisMechanismProfile
+         0     0%     0%      4.78s 97.75%  testing.tRunner
+         0     0%     0%      4.70s 96.11%  SpeedFair_simplify/pkg/ofo.(*OFOService).VerifyProposal
+         0     0%     0%      4.69s 95.91%  SpeedFair_simplify/pkg/ofo.(*OFOService).recomputeProposal
+     1.55s 31.70% 31.70%      3.76s 76.89%  SpeedFair_simplify/pkg/ofo.FairUpdate
+     0.35s  7.16% 38.85%      1.73s 35.38%  bytes.Equal (inline)
+     1.18s 24.13% 62.99%      1.18s 24.13%  memeqbody
+         0     0% 62.99%      0.71s 14.52%  SpeedFair_simplify/pkg/ofo.(*OFOService).validateReplicaOrders
+     0.17s  3.48% 66.46%      0.42s  8.59%  runtime.mapaccess2
+         0     0% 66.46%      0.32s  6.54%  SpeedFair_simplify/pkg/ofo.(*testOrderAuthenticator).VerifyReplica
+         0     0% 66.46%      0.32s  6.54%  crypto/ed25519.Verify (inline)
+         0     0% 66.46%      0.32s  6.54%  crypto/ed25519.VerifyWithOptions
+         0     0% 66.46%      0.32s  6.54%  crypto/internal/fips140/ed25519.Verify (inline)
+         0     0% 66.46%      0.32s  6.54%  crypto/internal/fips140/ed25519.verify
+         0     0% 66.46%      0.32s  6.54%  crypto/internal/fips140/ed25519.verifyWithDom
+     0.02s  0.41% 66.87%      0.29s  5.93%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult
+     0.02s  0.41% 67.28%      0.29s  5.93%  runtime.mapassign
+         0     0% 67.28%      0.26s  5.32%  runtime.mallocgc
+     0.26s  5.32% 72.60%      0.26s  5.32%  runtime.memequal
+         0     0% 72.60%      0.19s  3.89%  runtime.systemstack
+         0     0% 72.60%      0.18s  3.68%  SpeedFair_simplify/pkg/ofo.cloneProposal
+         0     0% 72.60%      0.18s  3.68%  internal/runtime/maps.(*table).grow
+         0     0% 72.60%      0.18s  3.68%  internal/runtime/maps.(*table).rehash
+         0     0% 72.60%      0.17s  3.48%  SpeedFair_simplify/pkg/ofo.cloneGraph (inline)
+     0.02s  0.41% 73.01%      0.17s  3.48%  runtime.memhash_varlen

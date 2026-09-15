@@ -1,0 +1,141 @@
+{
+  "status": "complete",
+  "started": "2026-09-13T16:58:06.819445+00:00",
+  "commands": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismStates$",
+        "-count=1",
+        "-v"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "state-tests.log"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismProfile$",
+        "-count=1",
+        "-v",
+        "-args",
+        "-micro-n=20",
+        "-micro-f=4",
+        "-micro-gamma=1",
+        "-micro-seed=1",
+        "-micro-scenarios=mechanism_cycle",
+        "-mechanism-profile=D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_cycle.pprof",
+        "-mechanism-profile-duration=5s"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-profile.log"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_cycle.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-cpu-top.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-cum",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_cycle.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-cpu-cumulative.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismProfile$",
+        "-count=1",
+        "-v",
+        "-args",
+        "-micro-n=20",
+        "-micro-f=4",
+        "-micro-gamma=1",
+        "-micro-seed=1",
+        "-micro-scenarios=mechanism_update",
+        "-mechanism-profile=D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_update.pprof",
+        "-mechanism-profile-duration=5s"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-profile.log"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_update.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-cpu-top.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-cum",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main\\mechanism_update.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-cpu-cumulative.txt"
+    }
+  ],
+  "scope": "local computation and controlled state; no ticker/network/BFT",
+  "artifacts_sha256": {
+    "collector-tests.log": "41b83878dd0c0b4ec1f16e4c1390c0c3e73ecfd8d6cb6d359812aa3433f0bf30",
+    "environment.json": "dcbc7c7d9d9ae934ad30aac19e81d877d2289a8851976c63361782686725cdf8",
+    "go-tests.log": "d2c00e8315206ac03c9b40f70f383768a9ab60fb73d670ce4f69aeff70a111b1",
+    "measurements.csv": "06191c1cf91d2268a25497c1504dc1410efeb192a48c18aca53dceba96435743",
+    "mechanism_cycle-cpu-cumulative.txt": "4e55f071fbabbb2c9ac058b6ac2f7527015fd3f345b2076a816a97f0f185e3b9",
+    "mechanism_cycle-cpu-top.txt": "e66147b553b0feafb22a04532e11a777ad0e508b48b8f18dc0f02378367bd99f",
+    "mechanism_cycle-profile.log": "8cb7e6aee0725d195b09908c14eebd013b52f3c0b9cc2eaa11495a1f7c10ff22",
+    "mechanism_cycle.pprof": "eea510ec7fa6355006509bd8b6df414221396fdfa9325e0ef338638974104054",
+    "mechanism_update-cpu-cumulative.txt": "b006ba067527716627895badf21e630daad6d81b46cdf1c5e982dfbbc1dcc6c4",
+    "mechanism_update-cpu-top.txt": "24a7e6802f26c5733aefa09bfc24af5e56cdd3b124f8e387f13e1d1076b5e0c6",
+    "mechanism_update-profile.log": "d48d7749738585d21a843512b5c6789f694bf542aa0f149d229fcef9ca998d16",
+    "mechanism_update.pprof": "4577eb6ffaa31077ca208750fa366f8a799e1f106f4e1e3df975db2c8e1b9c73",
+    "raw-p1-n20-seed1.log": "c8c5ea89af733aef53a1cc9be36a5defb38a0efb6c6de3a1c56249f03ab9ca7f",
+    "raw-p1-n20-seed19.log": "19edeb6fce98b44d8783b1783546fc7724efa8ac7c2c17e160f1058621e7d2fe",
+    "raw-p1-n20-seed7.log": "7216bc85df20af50479e138d8ebffcf7a4c7388fd88e09fb66c547facd2da5f2",
+    "raw-p2-n20-seed1.log": "6bca33233ff006f8ad5d5d879f641bc5db0eb32caccab3501fd105851d2cab32",
+    "raw-p2-n20-seed19.log": "87259e79a70ac17c6ea7f073161c2e83b9cea10a91b9f2e58095807d6cfcbe2f",
+    "raw-p2-n20-seed7.log": "7f479783b6659a5babbe0600a3a446468efc2d0771a02e2ff1af882a3b224661",
+    "raw-p3-n20-seed1.log": "92e3161088333da9e92a61574a0734db41d4c884ecccad2fa56fb27f382b822e",
+    "raw-p3-n20-seed19.log": "a747e9a13482dc364cf2a1e91def9a6840f6374b1e36068df57a49f1c025c860",
+    "raw-p3-n20-seed7.log": "dfd3684b0c10e3a28f6a9fe84962a9ca4e72324a2ffd18253648a49db9c2d73f",
+    "samples-n20-seed1.json": "26d073bbe09e35dc4557b57fab57d3f22e0b9eb639d9e464ef10b30b3c89151f",
+    "samples-n20-seed1.log": "93d72ecbefc15f764c3566f74d5d1d1070f9b34ac65bda45530e056bb6ddc4e4",
+    "samples-n20-seed19.json": "88875caf614d4700e0f51dd61bdaa3f5a7b1a459ff2eefcf5d08b067238c8a80",
+    "samples-n20-seed19.log": "13f7f5a26b983db9ebb6c7dcaabdf62af0dbaf2cbbf6326b45b1b7057f33dc08",
+    "samples-n20-seed7.json": "c4d40a24e1a76f13123787257675215a72782d7543321dd5d73c485c5fd6e04a",
+    "samples-n20-seed7.log": "18ad2be172ce5c2ac2cd3e4c8d0454e559e7282a69f48afcfa8be50d58fe23ad",
+    "state-rows.json": "4323b4cf3f49ca1c054dcd7b46a92909814cb881ace373ae19a7a0893f6444bb",
+    "state-tests.log": "39b6d3b942d15a3d1eb69a68abc9cb624c6af0f6ad1adffed1fe85bdd9591054",
+    "summary.json": "687d0dc3f31e8d62249f0d1fdb021b97ba5816928eb956e0b76c12d37ba4ba46"
+  }
+}

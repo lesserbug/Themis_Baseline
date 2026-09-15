@@ -337,19 +337,23 @@ type Config struct {
 
 func main() {
 	var (
-		configFile     = flag.String("config", "config.json", "JSON config file for node addresses")
-		nodeList       = flag.String("nodes", "", "Comma-separated list of node IDs to run on this instance")
-		cpuProfile     = flag.Bool("cpuprofile", false, "Enable CPU profiling for this instance")
-		faultCount     = flag.Uint64("f", 1, "Number of tolerated faulty replicas")
-		gamma          = flag.Float64("gamma", 0.90, "Fairness parameter gamma")
-		loInterval     = flag.Int("lo-interval", 150, "Interval in milliseconds for generating local orders")
-		loSize         = flag.Int("lo-size", 200, "Compatibility flag; Themis sends complete unproposed receipt lists")
-		byzantineCount = flag.Int64("byzantine-count", -1, "Actual malicious ordering replicas (default: f; must be between 0 and f)")
-		txRate         = flag.Int("tx-rate", 7000, "Transaction submission rate (tx/s)")
-		txSize         = flag.Int("tx-size", 512, "Canonical transaction size in bytes (minimum 16)")
-		simDuration    = flag.Int("sim-duration", 30, "Simulation duration in seconds")
+		configFile       = flag.String("config", "config.json", "JSON config file for node addresses")
+		nodeList         = flag.String("nodes", "", "Comma-separated list of node IDs to run on this instance")
+		cpuProfile       = flag.Bool("cpuprofile", false, "Enable CPU profiling for this instance")
+		faultCount       = flag.Uint64("f", 1, "Number of tolerated faulty replicas")
+		gamma            = flag.Float64("gamma", 0.90, "Fairness parameter gamma")
+		loInterval       = flag.Int("lo-interval", 150, "Interval in milliseconds for generating local orders")
+		loSize           = flag.Int("lo-size", 200, "Compatibility flag; Themis sends complete unproposed receipt lists")
+		byzantineCount   = flag.Int64("byzantine-count", -1, "Actual malicious ordering replicas (default: f; must be between 0 and f)")
+		byzantineLODelay = flag.Duration("byzantine-lo-delay", 0, "Extra wait before each malicious report generation/send attempt, e.g. 200ms")
+		txRate           = flag.Int("tx-rate", 7000, "Transaction submission rate (tx/s)")
+		txSize           = flag.Int("tx-size", 512, "Canonical transaction size in bytes (minimum 16)")
+		simDuration      = flag.Int("sim-duration", 30, "Simulation duration in seconds")
 	)
 	flag.Parse()
+	if *byzantineLODelay < 0 {
+		log.Fatal("byzantine-lo-delay must be non-negative")
+	}
 	if *txSize < 16 {
 		log.Fatal("Transaction size must be at least 16 bytes.")
 	}
@@ -381,7 +385,7 @@ func main() {
 	printBenchmarkBuild()
 	fmt.Printf("Nodes on this instance: %v\n", nodesToRun)
 	fmt.Printf("System params: N=%d, F=%d, GammaAll=%.2f (Themis all-replica premise)\n", totalNodesFromConfig, *faultCount, *gamma)
-	fmt.Printf("BENCHMARK FAULTS tolerated=%d byzantine=%d behavior=reverse\n", *faultCount, actualByzantine)
+	fmt.Printf("BENCHMARK FAULTS tolerated=%d byzantine=%d behavior=reverse lo_delay=%s\n", *faultCount, actualByzantine, *byzantineLODelay)
 	fmt.Printf("Malicious replicas are IDs >= %d (count=%d)\n", totalNodesFromConfig-actualByzantine, actualByzantine)
 	fmt.Printf("Workload params: TxRate=%d/s, TxSize=%dB, LO-Interval=%dms, LO-Size=%d (inactive compatibility field; complete lists)\n", *txRate, *txSize, *loInterval, *loSize)
 	fmt.Printf("Simulation duration: %d seconds\n\n", *simDuration)
@@ -397,10 +401,10 @@ func main() {
 		cancel()
 	}()
 
-	runDistributedMode(ctx, nodesToRun, config, totalNodesFromConfig, *faultCount, actualByzantine, *gamma, *loInterval, *loSize, *txRate, *txSize, *simDuration)
+	runDistributedMode(ctx, nodesToRun, config, totalNodesFromConfig, *faultCount, actualByzantine, *gamma, *loInterval, *loSize, *txRate, *txSize, *simDuration, *byzantineLODelay)
 }
 
-func runDistributedMode(rootCtx context.Context, nodeIDs []uint64, config map[uint64]string, totalNodes, faultCount, byzantineCount uint64, gamma float64, loIntervalMs, loSize, txRate, txSize, simDuration int) {
+func runDistributedMode(rootCtx context.Context, nodeIDs []uint64, config map[uint64]string, totalNodes, faultCount, byzantineCount uint64, gamma float64, loIntervalMs, loSize, txRate, txSize, simDuration int, byzantineLODelay time.Duration) {
 	ctx, cancel := context.WithCancel(rootCtx)
 	defer cancel()
 	var wg sync.WaitGroup
@@ -454,6 +458,7 @@ func runDistributedMode(rootCtx context.Context, nodeIDs []uint64, config map[ui
 				localInitFailed <- struct{}{}
 				return
 			}
+			service.ByzantineLODelay = byzantineLODelay
 			start := make(chan struct{})
 			adapter := &benchmarkNodeAdapter{
 				service: service, replicaID: id, replicaCount: totalNodes, leaderID: LEADER_REPLICA_ID,

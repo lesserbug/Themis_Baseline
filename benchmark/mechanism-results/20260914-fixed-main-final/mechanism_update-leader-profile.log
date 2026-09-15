@@ -1,0 +1,5 @@
+=== RUN   TestThemisMechanismProfile
+THEMIS_PROFILE scenario=mechanism_update calls=111 duration=5s stage=LeaderBuildFull
+--- PASS: TestThemisMechanismProfile (5.83s)
+PASS
+ok  	SpeedFair_simplify/pkg/ofo	6.473s

@@ -1,0 +1,139 @@
+=== RUN   TestThemisOrderingReplay
+=== RUN   TestThemisOrderingReplay/r0/seed1/b0
+THEMIS_ORDERING r=0 seed=1 b=0 adopted=0 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed1/b1
+THEMIS_ORDERING r=0 seed=1 b=1 adopted=1 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed1/b2
+THEMIS_ORDERING r=0 seed=1 b=2 adopted=2 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed19/b0
+THEMIS_ORDERING r=0 seed=19 b=0 adopted=0 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed19/b1
+THEMIS_ORDERING r=0 seed=19 b=1 adopted=1 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed19/b2
+THEMIS_ORDERING r=0 seed=19 b=2 adopted=2 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed7/b0
+THEMIS_ORDERING r=0 seed=7 b=0 adopted=0 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed7/b1
+THEMIS_ORDERING r=0 seed=7 b=1 adopted=1 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0/seed7/b2
+THEMIS_ORDERING r=0 seed=7 b=2 adopted=2 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed1/b0
+THEMIS_ORDERING r=0.1 seed=1 b=0 adopted=0 completed=1000 scc=998 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed1/b1
+THEMIS_ORDERING r=0.1 seed=1 b=1 adopted=1 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed1/b2
+THEMIS_ORDERING r=0.1 seed=1 b=2 adopted=2 completed=1000 scc=998 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed19/b0
+THEMIS_ORDERING r=0.1 seed=19 b=0 adopted=0 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed19/b1
+THEMIS_ORDERING r=0.1 seed=19 b=1 adopted=1 completed=1000 scc=1000 max_scc=1 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed19/b2
+THEMIS_ORDERING r=0.1 seed=19 b=2 adopted=2 completed=1000 scc=998 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed7/b0
+THEMIS_ORDERING r=0.1 seed=7 b=0 adopted=0 completed=1000 scc=998 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed7/b1
+THEMIS_ORDERING r=0.1 seed=7 b=1 adopted=1 completed=1000 scc=998 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r0.1/seed7/b2
+THEMIS_ORDERING r=0.1 seed=7 b=2 adopted=2 completed=1000 scc=994 max_scc=3 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed1/b0
+THEMIS_ORDERING r=1 seed=1 b=0 adopted=0 completed=1000 scc=971 max_scc=5 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed1/b1
+THEMIS_ORDERING r=1 seed=1 b=1 adopted=1 completed=1000 scc=925 max_scc=6 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed1/b2
+THEMIS_ORDERING r=1 seed=1 b=2 adopted=2 completed=1000 scc=893 max_scc=8 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed19/b0
+THEMIS_ORDERING r=1 seed=19 b=0 adopted=0 completed=1000 scc=969 max_scc=4 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed19/b1
+THEMIS_ORDERING r=1 seed=19 b=1 adopted=1 completed=1000 scc=954 max_scc=4 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed19/b2
+THEMIS_ORDERING r=1 seed=19 b=2 adopted=2 completed=1000 scc=873 max_scc=9 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed7/b0
+THEMIS_ORDERING r=1 seed=7 b=0 adopted=0 completed=1000 scc=985 max_scc=4 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed7/b1
+THEMIS_ORDERING r=1 seed=7 b=1 adopted=1 completed=1000 scc=949 max_scc=8 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r1/seed7/b2
+THEMIS_ORDERING r=1 seed=7 b=2 adopted=2 completed=1000 scc=891 max_scc=8 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed1/b0
+THEMIS_ORDERING r=10 seed=1 b=0 adopted=0 completed=1000 scc=217 max_scc=43 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed1/b1
+THEMIS_ORDERING r=10 seed=1 b=1 adopted=1 completed=1000 scc=65 max_scc=110 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed1/b2
+THEMIS_ORDERING r=10 seed=1 b=2 adopted=2 completed=1000 scc=8 max_scc=343 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed19/b0
+THEMIS_ORDERING r=10 seed=19 b=0 adopted=0 completed=1000 scc=214 max_scc=75 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed19/b1
+THEMIS_ORDERING r=10 seed=19 b=1 adopted=1 completed=1000 scc=88 max_scc=155 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed19/b2
+THEMIS_ORDERING r=10 seed=19 b=2 adopted=2 completed=1000 scc=13 max_scc=597 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed7/b0
+THEMIS_ORDERING r=10 seed=7 b=0 adopted=0 completed=1000 scc=209 max_scc=50 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed7/b1
+THEMIS_ORDERING r=10 seed=7 b=1 adopted=1 completed=1000 scc=81 max_scc=97 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r10/seed7/b2
+THEMIS_ORDERING r=10 seed=7 b=2 adopted=2 completed=1000 scc=4 max_scc=641 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed1/b0
+THEMIS_ORDERING r=100 seed=1 b=0 adopted=0 completed=1000 scc=2 max_scc=999 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed1/b1
+THEMIS_ORDERING r=100 seed=1 b=1 adopted=1 completed=1000 scc=1 max_scc=1000 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed1/b2
+THEMIS_ORDERING r=100 seed=1 b=2 adopted=2 completed=1000 scc=2 max_scc=999 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed19/b0
+THEMIS_ORDERING r=100 seed=19 b=0 adopted=0 completed=1000 scc=2 max_scc=999 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed19/b1
+THEMIS_ORDERING r=100 seed=19 b=1 adopted=1 completed=1000 scc=2 max_scc=999 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed19/b2
+THEMIS_ORDERING r=100 seed=19 b=2 adopted=2 completed=1000 scc=2 max_scc=999 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed7/b0
+THEMIS_ORDERING r=100 seed=7 b=0 adopted=0 completed=1000 scc=1 max_scc=1000 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed7/b1
+THEMIS_ORDERING r=100 seed=7 b=1 adopted=1 completed=1000 scc=1 max_scc=1000 violations=0 cycle=0 adjacency=0
+=== RUN   TestThemisOrderingReplay/r100/seed7/b2
+THEMIS_ORDERING r=100 seed=7 b=2 adopted=2 completed=1000 scc=1 max_scc=1000 violations=0 cycle=0 adjacency=0
+--- PASS: TestThemisOrderingReplay (427.34s)
+    --- PASS: TestThemisOrderingReplay/r0/seed1/b0 (8.12s)
+    --- PASS: TestThemisOrderingReplay/r0/seed1/b1 (9.29s)
+    --- PASS: TestThemisOrderingReplay/r0/seed1/b2 (9.55s)
+    --- PASS: TestThemisOrderingReplay/r0/seed19/b0 (9.60s)
+    --- PASS: TestThemisOrderingReplay/r0/seed19/b1 (9.32s)
+    --- PASS: TestThemisOrderingReplay/r0/seed19/b2 (9.17s)
+    --- PASS: TestThemisOrderingReplay/r0/seed7/b0 (9.21s)
+    --- PASS: TestThemisOrderingReplay/r0/seed7/b1 (9.55s)
+    --- PASS: TestThemisOrderingReplay/r0/seed7/b2 (9.81s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed1/b0 (9.18s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed1/b1 (9.15s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed1/b2 (9.00s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed19/b0 (8.91s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed19/b1 (9.11s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed19/b2 (8.98s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed7/b0 (9.62s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed7/b1 (10.15s)
+    --- PASS: TestThemisOrderingReplay/r0.1/seed7/b2 (9.40s)
+    --- PASS: TestThemisOrderingReplay/r1/seed1/b0 (9.02s)
+    --- PASS: TestThemisOrderingReplay/r1/seed1/b1 (9.28s)
+    --- PASS: TestThemisOrderingReplay/r1/seed1/b2 (9.24s)
+    --- PASS: TestThemisOrderingReplay/r1/seed19/b0 (9.05s)
+    --- PASS: TestThemisOrderingReplay/r1/seed19/b1 (9.79s)
+    --- PASS: TestThemisOrderingReplay/r1/seed19/b2 (9.27s)
+    --- PASS: TestThemisOrderingReplay/r1/seed7/b0 (9.01s)
+    --- PASS: TestThemisOrderingReplay/r1/seed7/b1 (9.04s)
+    --- PASS: TestThemisOrderingReplay/r1/seed7/b2 (9.03s)
+    --- PASS: TestThemisOrderingReplay/r10/seed1/b0 (8.48s)
+    --- PASS: TestThemisOrderingReplay/r10/seed1/b1 (8.68s)
+    --- PASS: TestThemisOrderingReplay/r10/seed1/b2 (9.52s)
+    --- PASS: TestThemisOrderingReplay/r10/seed19/b0 (8.41s)
+    --- PASS: TestThemisOrderingReplay/r10/seed19/b1 (8.97s)
+    --- PASS: TestThemisOrderingReplay/r10/seed19/b2 (10.24s)
+    --- PASS: TestThemisOrderingReplay/r10/seed7/b0 (8.65s)
+    --- PASS: TestThemisOrderingReplay/r10/seed7/b1 (8.89s)
+    --- PASS: TestThemisOrderingReplay/r10/seed7/b2 (9.92s)
+    --- PASS: TestThemisOrderingReplay/r100/seed1/b0 (11.21s)
+    --- PASS: TestThemisOrderingReplay/r100/seed1/b1 (10.61s)
+    --- PASS: TestThemisOrderingReplay/r100/seed1/b2 (10.10s)
+    --- PASS: TestThemisOrderingReplay/r100/seed19/b0 (10.79s)
+    --- PASS: TestThemisOrderingReplay/r100/seed19/b1 (10.85s)
+    --- PASS: TestThemisOrderingReplay/r100/seed19/b2 (10.70s)
+    --- PASS: TestThemisOrderingReplay/r100/seed7/b0 (10.82s)
+    --- PASS: TestThemisOrderingReplay/r100/seed7/b1 (10.37s)
+    --- PASS: TestThemisOrderingReplay/r100/seed7/b2 (9.90s)
+PASS
+ok  	SpeedFair_simplify/pkg/ofo	427.939s

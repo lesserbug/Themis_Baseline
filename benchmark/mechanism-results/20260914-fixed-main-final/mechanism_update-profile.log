@@ -1,0 +1,5 @@
+=== RUN   TestThemisMechanismProfile
+THEMIS_PROFILE scenario=mechanism_update calls=202 duration=5s stage=FollowerVerifyFull
+--- PASS: TestThemisMechanismProfile (5.89s)
+PASS
+ok  	SpeedFair_simplify/pkg/ofo	6.531s

@@ -1,0 +1,173 @@
+[
+  {
+    "file": "byzantine-smoke-n20-f4-b0-r50-i150-run1-20260912T153535824244Z-33809e4b.log",
+    "duration": "3s",
+    "tps": "47.33",
+    "offered": "49.67",
+    "latency": "97ms",
+    "outstanding": "7",
+    "diag": {
+      "list_count": 20,
+      "list_ids_total": 157,
+      "list_ids_max": 15,
+      "build_count": 19,
+      "build_nil": 1,
+      "build_ns_total": 22408700,
+      "hosting_ns_total": 141899400,
+      "proposals_accepted": 18,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "byzantine-smoke-n20-f4-b1-r50-i150-run1-20260912T153543534400Z-d4d94beb.log",
+    "duration": "3s",
+    "tps": "47.33",
+    "offered": "49.67",
+    "latency": "121ms",
+    "outstanding": "7",
+    "diag": {
+      "list_count": 19,
+      "list_ids_total": 173,
+      "list_ids_max": 15,
+      "build_count": 21,
+      "build_nil": 3,
+      "build_ns_total": 25334300,
+      "hosting_ns_total": 140739500,
+      "proposals_accepted": 18,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "byzantine-smoke-n20-f4-b2-r50-i150-run1-20260912T153550810523Z-fb4b1599.log",
+    "duration": "3s",
+    "tps": "47.33",
+    "offered": "49.67",
+    "latency": "90ms",
+    "outstanding": "7",
+    "diag": {
+      "list_count": 20,
+      "list_ids_total": 154,
+      "list_ids_max": 8,
+      "build_count": 19,
+      "build_nil": 0,
+      "build_ns_total": 25111600,
+      "hosting_ns_total": 156807100,
+      "proposals_accepted": 19,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "byzantine-smoke-n20-f4-b3-r50-i150-run1-20260912T153557916073Z-e898694d.log",
+    "duration": "3s",
+    "tps": "47.33",
+    "offered": "49.67",
+    "latency": "112ms",
+    "outstanding": "7",
+    "diag": {
+      "list_count": 19,
+      "list_ids_total": 164,
+      "list_ids_max": 15,
+      "build_count": 19,
+      "build_nil": 1,
+      "build_ns_total": 21026000,
+      "hosting_ns_total": 144684500,
+      "proposals_accepted": 18,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "byzantine-smoke-n20-f4-b4-r50-i150-run1-20260912T153605211893Z-1dfc6163.log",
+    "duration": "3s",
+    "tps": "45.00",
+    "offered": "49.67",
+    "latency": "123ms",
+    "outstanding": "14",
+    "diag": {
+      "list_count": 20,
+      "list_ids_total": 187,
+      "list_ids_max": 15,
+      "build_count": 19,
+      "build_nil": 1,
+      "build_ns_total": 24929100,
+      "hosting_ns_total": 141107200,
+      "proposals_accepted": 18,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "smoke-n10-f1-r100-i150-run1-20260912T102502528225Z-55cbb977.log",
+    "duration": "4s",
+    "tps": "97.25",
+    "offered": "99.75",
+    "latency": "94ms",
+    "outstanding": "10",
+    "diag": {
+      "list_count": 26,
+      "list_ids_total": 405,
+      "list_ids_max": 29,
+      "build_count": 26,
+      "build_nil": 0,
+      "build_ns_total": 30304700,
+      "hosting_ns_total": 187142600,
+      "proposals_accepted": 26,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "smoke-n10-f1-r100-i150-run1-20260912T150804856223Z-9c7f2c60.log",
+    "duration": "4s",
+    "tps": "97.25",
+    "offered": "99.75",
+    "latency": "94ms",
+    "outstanding": "10",
+    "diag": {
+      "list_count": 26,
+      "list_ids_total": 394,
+      "list_ids_max": 17,
+      "build_count": 26,
+      "build_nil": 0,
+      "build_ns_total": 31281500,
+      "hosting_ns_total": 260977600,
+      "proposals_accepted": 26,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "smoke-n10-f1-r100-i50-run1-20260912T102454005427Z-6b2adf1f.log",
+    "duration": "4s",
+    "tps": "98.50",
+    "offered": "99.75",
+    "latency": "37ms",
+    "outstanding": "5",
+    "diag": {
+      "list_count": 80,
+      "list_ids_total": 427,
+      "list_ids_max": 10,
+      "build_count": 79,
+      "build_nil": 4,
+      "build_ns_total": 57148600,
+      "hosting_ns_total": 225553000,
+      "proposals_accepted": 75,
+      "deferred_proposals": 0
+    }
+  },
+  {
+    "file": "smoke-n10-f1-r100-i50-run1-20260912T150756150568Z-3f188d1c.log",
+    "duration": "4s",
+    "tps": "98.50",
+    "offered": "99.75",
+    "latency": "41ms",
+    "outstanding": "5",
+    "diag": {
+      "list_count": 80,
+      "list_ids_total": 450,
+      "list_ids_max": 11,
+      "build_count": 79,
+      "build_nil": 1,
+      "build_ns_total": 81728400,
+      "hosting_ns_total": 413471800,
+      "proposals_accepted": 78,
+      "deferred_proposals": 0
+    }
+  }
+]

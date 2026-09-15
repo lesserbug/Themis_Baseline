@@ -1,0 +1,193 @@
+{
+  "status": "complete",
+  "started": "2026-09-14T04:40:47.598867+00:00",
+  "commands": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismStates$",
+        "-count=1",
+        "-v"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "state-tests.log"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismProfile$",
+        "-count=1",
+        "-v",
+        "-args",
+        "-micro-n=20",
+        "-micro-f=4",
+        "-micro-gamma=1",
+        "-micro-seed=1",
+        "-micro-scenarios=mechanism_cycle",
+        "-mechanism-profile=D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_cycle.pprof",
+        "-mechanism-profile-duration=5s",
+        "-mechanism-profile-stage=FollowerVerifyFull"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-profile.log"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_cycle.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-cpu-top.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-cum",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_cycle.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_cycle-cpu-cumulative.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismProfile$",
+        "-count=1",
+        "-v",
+        "-args",
+        "-micro-n=20",
+        "-micro-f=4",
+        "-micro-gamma=1",
+        "-micro-seed=1",
+        "-micro-scenarios=mechanism_update",
+        "-mechanism-profile=D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update.pprof",
+        "-mechanism-profile-duration=5s",
+        "-mechanism-profile-stage=FollowerVerifyFull"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-profile.log"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-cpu-top.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-cum",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-cpu-cumulative.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./pkg/ofo",
+        "-run=^TestThemisMechanismProfile$",
+        "-count=1",
+        "-v",
+        "-args",
+        "-micro-n=20",
+        "-micro-f=4",
+        "-micro-gamma=1",
+        "-micro-seed=1",
+        "-micro-scenarios=mechanism_update",
+        "-mechanism-profile=D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update-leader.pprof",
+        "-mechanism-profile-duration=5s",
+        "-mechanism-profile-stage=LeaderBuildFull"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-leader-profile.log"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update-leader.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-leader-cpu-top.txt"
+    },
+    {
+      "argv": [
+        "go",
+        "tool",
+        "pprof",
+        "-top",
+        "-cum",
+        "-nodecount=25",
+        "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify\\benchmark\\mechanism-results\\20260914-fixed-main-final\\mechanism_update-leader.pprof"
+      ],
+      "cwd": "D:\\Work\\go\\workplace\\code\\SpeedFair_simplify",
+      "log": "mechanism_update-leader-cpu-cumulative.txt"
+    }
+  ],
+  "scope": "local computation and controlled state; no ticker/network/BFT",
+  "artifacts_sha256": {
+    "collector-tests.log": "41b83878dd0c0b4ec1f16e4c1390c0c3e73ecfd8d6cb6d359812aa3433f0bf30",
+    "environment.json": "88e6ca4787236a034ee4a317711bd2865a00cad8dd8163ff1c8b6094c1e57a31",
+    "go-tests.log": "6f4a45bb1dbe04ad7c5cc1235e715cfae6dda08524855da6a1c6851e881cdb84",
+    "measurements.csv": "0601af0cb14fd58e9ad8fc298d94a34eaf8e79ce7c0d01f5be6fd5e801191210",
+    "mechanism_cycle-cpu-cumulative.txt": "75e4ad8c3cf7586b296d2ef58e3ed64d07d48857e757d0c0da9a7cc747752966",
+    "mechanism_cycle-cpu-top.txt": "6109a5770a648332da71b95f0f14b4dd671572adcd6c65713422d41d021dc87a",
+    "mechanism_cycle-profile.log": "8ae44d51f4fca0f5acc1f3cd1f61a024bcb5763bcbab42041f15e3ca2cd9dbd6",
+    "mechanism_cycle.pprof": "697585e28afa616fce465846e0d72ce2ba32c6b141d15ed63dba7ec31ca0290f",
+    "mechanism_update-cpu-cumulative.txt": "ab5873e886cd7ea614600a3862754cf23087b5de7a95b85433d6c669bfafd391",
+    "mechanism_update-cpu-top.txt": "e4022b623e97e530ab4545be8db253c66e0c45ce8e97182e9657b73815486cec",
+    "mechanism_update-leader-cpu-cumulative.txt": "d1dd46590123e5405988d34dd1be5708a7644268789fb8806b6a041b680a0b1e",
+    "mechanism_update-leader-cpu-top.txt": "b7a912c40755c2fb6a502ef9a2292fe2bbdc40b9bcb43f4a883da842804ecfc4",
+    "mechanism_update-leader-profile.log": "98c0b40dbf9459ea660088e0e6a28c23ce88b02256f507f2b0a930dc7d02a7e7",
+    "mechanism_update-leader.pprof": "a062a5d0034c99c4f01f8f44e17128ab3850c619048529c1bfdc6db3c7d0c98d",
+    "mechanism_update-profile.log": "2fc61c351bc2a33b435544792d0c0fe7a8791470bf55bfbf4b130f7209b4da0f",
+    "mechanism_update.pprof": "48c9efeead62a5657a88e5f7ff6c61dcfbe984e99a45ad2c7768653195daef0a",
+    "raw-p1-n20-seed1.log": "28c73e0c3f7712d985ef44d8d145062982ac438be5eea1371fff2924f382867e",
+    "raw-p1-n20-seed19.log": "b6e46739664a8c3dcafce0b8987564ce5baf55a94e22deb8e092be9da48a5696",
+    "raw-p1-n20-seed7.log": "722dbe729d5a1ee1f35efaec1c59f0f088c09d65b90b96d45cbe1f869d0cfbe3",
+    "raw-p2-n20-seed1.log": "70c0ae6879478f9bd3cd1e3b273052337fd2039e54a6a21c567fdfb595e2a0f1",
+    "raw-p2-n20-seed19.log": "862e51f7ae890b4f04a2b06a8964d5417c762b434e8caa4498a2878968f48ec6",
+    "raw-p2-n20-seed7.log": "1932418f2ec71d4d9ea2639baa13225dd29f93ba4559137652f5f08f50830006",
+    "raw-p3-n20-seed1.log": "0036eb5aeafdf8630171d6e35e6f1c4f04197a9047f1a000a4b7c52b68f08989",
+    "raw-p3-n20-seed19.log": "5c033faae90fba537bdb957795401bdb1ce19eb91fd26056778d0d3a238f4d6e",
+    "raw-p3-n20-seed7.log": "0ebe57aecfc8f3e06108d71ecea55b1fdb4241893373f19f9b6393ae3492606f",
+    "samples-n20-seed1.json": "26d073bbe09e35dc4557b57fab57d3f22e0b9eb639d9e464ef10b30b3c89151f",
+    "samples-n20-seed1.log": "2288d78212a1813a883a18e56f7ae3abb8d113cd800ff081372a0603523ccee1",
+    "samples-n20-seed19.json": "88875caf614d4700e0f51dd61bdaa3f5a7b1a459ff2eefcf5d08b067238c8a80",
+    "samples-n20-seed19.log": "9bed417ce82f9a5a92aaf878ef8bd8b8bbd10f64e5c11246edb04abc1555a0e5",
+    "samples-n20-seed7.json": "c4d40a24e1a76f13123787257675215a72782d7543321dd5d73c485c5fd6e04a",
+    "samples-n20-seed7.log": "c4786149b62475c719b2fe84e9dd9e86af1652552b50ff411bebf36593aac2be",
+    "state-rows.json": "4323b4cf3f49ca1c054dcd7b46a92909814cb881ace373ae19a7a0893f6444bb",
+    "state-tests.log": "a14723826b6b9b8914bfe38a75892264b800fe874a426cfe034a0f8149a73aef",
+    "summary.json": "d5c17fffa55e5866aef3fced7accc5568fa6b5acce3069453bc1de47aadee199"
+  }
+}

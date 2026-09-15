@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build1253004174\b001\ofo.test.exe2026-09-14 14:41:01.6721321 +1000 AEST
+Type: cpu
+Time: 2026-09-14 14:41:03 AEST
+Duration: 5.20s, Total samples = 4.89s (94.12%)
+Showing nodes accounting for 4.44s, 90.80% of 4.89s total
+Dropped 144 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 81
+      flat  flat%   sum%        cum   cum%
+     1.55s 31.70% 31.70%      3.76s 76.89%  SpeedFair_simplify/pkg/ofo.FairUpdate
+     1.18s 24.13% 55.83%      1.18s 24.13%  memeqbody
+     0.35s  7.16% 62.99%      1.73s 35.38%  bytes.Equal (inline)
+     0.26s  5.32% 68.30%      0.26s  5.32%  runtime.memequal
+     0.17s  3.48% 71.78%      0.42s  8.59%  runtime.mapaccess2
+     0.15s  3.07% 74.85%      0.15s  3.07%  aeshashbody
+     0.14s  2.86% 77.71%      0.14s  2.86%  crypto/internal/fips140/edwards25519/field.feMul
+     0.09s  1.84% 79.55%      0.09s  1.84%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.08s  1.64% 81.19%      0.08s  1.64%  crypto/internal/fips140/edwards25519/field.feSquare
+     0.07s  1.43% 82.62%      0.07s  1.43%  runtime.memmove
+     0.06s  1.23% 83.84%      0.06s  1.23%  runtime.memclrNoHeapPointers
+     0.05s  1.02% 84.87%      0.05s  1.02%  crypto/internal/fips140/sha256.blockSHANI
+     0.05s  1.02% 85.89%      0.08s  1.64%  runtime.scanobject
+     0.04s  0.82% 86.71%      0.09s  1.84%  internal/runtime/maps.(*table).uncheckedPutSlot
+     0.04s  0.82% 87.53%      0.06s  1.23%  runtime.typedmemmove
+     0.03s  0.61% 88.14%      0.04s  0.82%  runtime.scanblock
+     0.02s  0.41% 88.55%      0.29s  5.93%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult
+     0.02s  0.41% 88.96%      0.07s  1.43%  runtime.mapaccess1
+     0.02s  0.41% 89.37%      0.29s  5.93%  runtime.mapassign
+     0.02s  0.41% 89.78%      0.17s  3.48%  runtime.memhash_varlen
+     0.01s   0.2% 89.98%      0.09s  1.84%  SpeedFair_simplify/pkg/types.writeTxIDs
+     0.01s   0.2% 90.18%      0.09s  1.84%  bytes.(*Buffer).Write
+     0.01s   0.2% 90.39%      0.03s  0.61%  crypto/internal/fips140/edwards25519/field.(*Element).Add
+     0.01s   0.2% 90.59%      0.09s  1.84%  crypto/internal/fips140/edwards25519/field.(*Element).Square (inline)
+     0.01s   0.2% 90.80%      0.13s  2.66%  runtime.deductAssistCredit

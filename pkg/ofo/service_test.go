@@ -19,6 +19,65 @@ type testNetwork struct {
 	sent    chan network.Message
 }
 
+func TestByzantineReportDelay(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		malicious  bool
+		delay      time.Duration
+		cancelWait bool
+	}{
+		{"default-zero", true, 0, false},
+		{"honest-not-delayed", false, time.Hour, false},
+		{"malicious-delayed", true, 200 * time.Millisecond, false},
+		{"cancel-wait", true, time.Hour, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			net := &testNetwork{sent: make(chan network.Message, 8)}
+			s, err := NewOFOService(1, 10, 2, 1, net, 200, 10, tc.malicious, newTestOrderAuthenticator(10))
+			if err != nil {
+				t.Fatal(err)
+			}
+			s.ByzantineLODelay = tc.delay
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			done := make(chan struct{})
+			start := time.Now()
+			go func() { defer close(done); s.Start(ctx) }()
+			if tc.cancelWait {
+				time.Sleep(30 * time.Millisecond)
+				cancel()
+				select {
+				case <-done:
+				case <-time.After(time.Second):
+					t.Fatal("delay ignored cancellation")
+				}
+				select {
+				case <-net.sent:
+					t.Fatal("cancelled wait sent a report")
+				default:
+				}
+				return
+			}
+			for i := 0; i < 2; i++ {
+				select {
+				case <-net.sent:
+					if tc.malicious && time.Since(start) < time.Duration(i+1)*tc.delay {
+						t.Fatal("report sent before delay elapsed")
+					}
+				case <-time.After(2 * time.Second):
+					t.Fatal("report not sent")
+				}
+			}
+			cancel()
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+				t.Fatal("reporting did not stop")
+			}
+		})
+	}
+}
+
 func (network *testNetwork) Register(_ uint64, handler func(network.Message)) {
 	network.handler = handler
 }

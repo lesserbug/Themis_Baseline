@@ -1,0 +1,89 @@
+{
+  "reviewed_commit": "e679a8976ec718cafa7b4e6ad04a08624b2e5371",
+  "started_clean": true,
+  "source_files": [
+    {
+      "path": "pkg/main.go",
+      "sha256": "3a895f86f8788546d1f99f5cb0818cf5e41fb82d156826cee73a6687e33668b7"
+    },
+    {
+      "path": "pkg/benchmark_adapter.go",
+      "sha256": "92db652fc3ae6dfe02ea0b7f2c48a309ed398c20c6bd9defdd060cc947af9c4e"
+    },
+    {
+      "path": "pkg/benchmark_faults.go",
+      "sha256": "411df44675dd9e87f569fed15ac60ce5dc9309964ec546e09becf0c1a07c467e"
+    },
+    {
+      "path": "pkg/types/type.go",
+      "sha256": "9a9f94456af5666bafe16280cfeb47ab3e24f76209e8e0e19aa0e64e7173038a"
+    },
+    {
+      "path": "pkg/network/network.go",
+      "sha256": "333f7bd1c1cd7773f69f8b861f916b027fbb0f432f9a0477f0d6e0d64d6027cc"
+    },
+    {
+      "path": "pkg/ofo/service.go",
+      "sha256": "db8ca30de696ddc2fffe04837d0cb9050fb5e0699b2142d8f7bf58b09745f697"
+    },
+    {
+      "path": "pkg/ofo/dependency.go",
+      "sha256": "205218cf4515396e8af9b0509ab423467d0adae5d2a188671533bfe94771568e"
+    },
+    {
+      "path": "pkg/ofo/benchmark_diagnostics.go",
+      "sha256": "bd16f321568ea4545c3ff0c772862f9b7f4dc11f4ce9bb95e76416e0e06ebcd5"
+    },
+    {
+      "path": "benchmark/fabfile.py",
+      "sha256": "bb8cddfe3938a180f9c5d85ba3ca611266ba35f65d523f851ee08b9a03f99da7"
+    },
+    {
+      "path": "benchmark/settings.json",
+      "sha256": "b632f28a9a640b2cdd3305dea5f8432947a67b8ccce0a28505adc4cdca79d23a"
+    }
+  ],
+  "author_commit": "6b3aef8f0ea70ec939322baa61853f934e4e7fb2",
+  "author_parent": "bd70894379e208ca6e5e9576d3767f7a3040590b",
+  "tests": [
+    {
+      "command": "go test ./... -count=1",
+      "scope": "original source repository",
+      "result": "PASS"
+    },
+    {
+      "command": "go test ./pkg/ofo -run TestIndependent -v -count=1",
+      "scope": "isolated temporary copy with audit_repros_test.go",
+      "result": "7 tests PASS; witness tests assert reproduction, not theorem conformance"
+    },
+    {
+      "command": "python -m unittest discover -s benchmark -p test_fabfile.py",
+      "scope": "original repository, remote calls mocked",
+      "result": "17 tests PASS"
+    }
+  ],
+  "go_version": "go1.24.5 windows/amd64",
+  "production_code_modified": false,
+  "cloud_accessed": false,
+  "existing_profile": {
+    "path": "pkg/cpu_themis.pprof",
+    "bytes": 0,
+    "usable": false
+  },
+  "source_downloads": [
+    {
+      "url": "https://eprint.iacr.org/archive/2021/1465/1636213717.pdf",
+      "sha256": "2796332824740003ca238d48c58ecb4b7d7499e49859f20877e63a09e32a43c7",
+      "pages": 33
+    },
+    {
+      "url": "https://eprint.iacr.org/archive/2021/1465/1669765544.pdf",
+      "sha256": "51178e3871782abf48658184a4d588c434c0803482d01ad46efb925f920a98fd",
+      "pages": 19
+    },
+    {
+      "url": "https://mahimnakelkar.github.io/dissertation.pdf",
+      "sha256": "34c6fdef83dba4e1e385cfc04fff82debd5ae1456ac9bf819ce4d0bd5af3803a"
+    }
+  ]
+}

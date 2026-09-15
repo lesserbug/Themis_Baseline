@@ -1,0 +1,275 @@
+{
+  "mechanism_small": {
+    "metrics": {
+      "added_update_edges": 0,
+      "blocked_missing_pairs": 0,
+      "cached_proof_entries": 0,
+      "cached_state_entries": 0,
+      "completed_txs": 3,
+      "deferred_batches": 0,
+      "effective_local_occurrences": 384,
+      "effective_new_receipt_events": 384,
+      "effective_new_txs": 24,
+      "evidence_touched_txs": 24,
+      "fresh_txs": 24,
+      "local_evidence_occurrences": 384,
+      "measured_max_local_order": 24,
+      "measured_max_receipts": 24,
+      "measured_max_update_order": 0,
+      "new_graph_edges": 276,
+      "new_graph_max_scc": 1,
+      "new_graph_nodes": 24,
+      "new_graph_nontrivial_sccs": 0,
+      "new_graph_sccs": 24,
+      "new_weight_entries": 276,
+      "output_batches": 1,
+      "output_txs": 24,
+      "pool_entries": 24,
+      "post_retained_txs": 0,
+      "proof_signature_bytes": 1024,
+      "proof_signatures": 16,
+      "receipt_cap": 200,
+      "retained_graph_edges": 0,
+      "retained_graph_max_scc": 0,
+      "retained_graph_nodes": 0,
+      "retained_graph_nontrivial_sccs": 0,
+      "retained_graph_sccs": 0,
+      "retained_txs": 0,
+      "sequence_entries": 16,
+      "update_evidence_occurrences": 0,
+      "warmup_max_local_order": 3,
+      "warmup_max_receipts": 3,
+      "warmup_max_update_order": 0,
+      "warmup_rounds": 1
+    },
+    "stages": {
+      "GraphCore": {
+        "median_ms": 0.452023,
+        "min_ms": 0.436791,
+        "max_ms": 0.50178,
+        "median_bytes": 246810.0,
+        "median_allocs": 1081.0,
+        "observations": 9
+      },
+      "LeaderBuildFull": {
+        "median_ms": 1.529129,
+        "min_ms": 1.485698,
+        "max_ms": 1.558798,
+        "median_bytes": 387246.0,
+        "median_allocs": 1445.0,
+        "observations": 9
+      },
+      "CandidateCheckCore": {
+        "median_ms": 0.54259,
+        "min_ms": 0.52398,
+        "max_ms": 0.559584,
+        "median_bytes": 286602.0,
+        "median_allocs": 1207.0,
+        "observations": 9
+      },
+      "FollowerVerifyFull": {
+        "median_ms": 1.587001,
+        "min_ms": 1.547341,
+        "max_ms": 1.771389,
+        "median_bytes": 427039.0,
+        "median_allocs": 1571.0,
+        "observations": 9
+      },
+      "CommitFinalizeFull": {
+        "median_ms": 0.20029,
+        "min_ms": 0.188129,
+        "max_ms": 0.216564,
+        "median_bytes": 144577.0,
+        "median_allocs": 660.0,
+        "observations": 9
+      }
+    },
+    "rho": {
+      "median": 1.0434655420394432,
+      "min": 1.0109831163171474,
+      "max": 1.155529012999619
+    }
+  },
+  "mechanism_cycle": {
+    "metrics": {
+      "added_update_edges": 0,
+      "blocked_missing_pairs": 0,
+      "cached_proof_entries": 0,
+      "cached_state_entries": 0,
+      "completed_txs": 3,
+      "deferred_batches": 0,
+      "effective_local_occurrences": 3072,
+      "effective_new_receipt_events": 3072,
+      "effective_new_txs": 192,
+      "evidence_touched_txs": 192,
+      "fresh_txs": 192,
+      "local_evidence_occurrences": 3072,
+      "measured_max_local_order": 192,
+      "measured_max_receipts": 192,
+      "measured_max_update_order": 0,
+      "new_graph_edges": 18336,
+      "new_graph_max_scc": 192,
+      "new_graph_nodes": 192,
+      "new_graph_nontrivial_sccs": 1,
+      "new_graph_sccs": 1,
+      "new_weight_entries": 30624,
+      "output_batches": 1,
+      "output_txs": 192,
+      "pool_entries": 192,
+      "post_retained_txs": 0,
+      "proof_signature_bytes": 1024,
+      "proof_signatures": 16,
+      "receipt_cap": 200,
+      "retained_graph_edges": 0,
+      "retained_graph_max_scc": 0,
+      "retained_graph_nodes": 0,
+      "retained_graph_nontrivial_sccs": 0,
+      "retained_graph_sccs": 0,
+      "retained_txs": 0,
+      "sequence_entries": 16,
+      "update_evidence_occurrences": 0,
+      "warmup_max_local_order": 3,
+      "warmup_max_receipts": 3,
+      "warmup_max_update_order": 0,
+      "warmup_rounds": 1
+    },
+    "stages": {
+      "GraphCore": {
+        "median_ms": 26.93465,
+        "min_ms": 25.508176,
+        "max_ms": 31.303292,
+        "median_bytes": 9115184.0,
+        "median_allocs": 6999.0,
+        "observations": 9
+      },
+      "LeaderBuildFull": {
+        "median_ms": 28.80787,
+        "min_ms": 28.22425,
+        "max_ms": 33.476784,
+        "median_bytes": 12694985.0,
+        "median_allocs": 8240.0,
+        "observations": 9
+      },
+      "CandidateCheckCore": {
+        "median_ms": 37.179036,
+        "min_ms": 34.920735,
+        "max_ms": 38.887032,
+        "median_bytes": 13438869.0,
+        "median_allocs": 10636.0,
+        "observations": 9
+      },
+      "FollowerVerifyFull": {
+        "median_ms": 40.765821,
+        "min_ms": 38.735713,
+        "max_ms": 41.479043,
+        "median_bytes": 17018666.0,
+        "median_allocs": 11877.0,
+        "observations": 9
+      },
+      "CommitFinalizeFull": {
+        "median_ms": 20.102548,
+        "min_ms": 19.774588,
+        "max_ms": 20.842361,
+        "median_bytes": 4559656.0,
+        "median_allocs": 2042.0,
+        "observations": 9
+      }
+    },
+    "rho": {
+      "median": 1.410697681600228,
+      "min": 1.192708027150995,
+      "max": 1.4443544469737903
+    }
+  },
+  "mechanism_update": {
+    "metrics": {
+      "added_update_edges": 1,
+      "blocked_missing_pairs": 1,
+      "cached_proof_entries": 17344,
+      "cached_state_entries": 480,
+      "completed_txs": 3,
+      "deferred_batches": 4,
+      "effective_local_occurrences": 128,
+      "effective_new_receipt_events": 148,
+      "effective_new_txs": 8,
+      "evidence_touched_txs": 488,
+      "fresh_txs": 8,
+      "local_evidence_occurrences": 128,
+      "measured_max_local_order": 8,
+      "measured_max_receipts": 11,
+      "measured_max_update_order": 480,
+      "new_graph_edges": 28,
+      "new_graph_max_scc": 1,
+      "new_graph_nodes": 8,
+      "new_graph_nontrivial_sccs": 0,
+      "new_graph_sccs": 8,
+      "new_weight_entries": 28,
+      "output_batches": 5,
+      "output_txs": 488,
+      "pool_entries": 488,
+      "post_retained_txs": 0,
+      "proof_signature_bytes": 2048,
+      "proof_signatures": 32,
+      "receipt_cap": 200,
+      "retained_graph_edges": 42728,
+      "retained_graph_max_scc": 1,
+      "retained_graph_nodes": 480,
+      "retained_graph_nontrivial_sccs": 0,
+      "retained_graph_sccs": 480,
+      "retained_txs": 480,
+      "sequence_entries": 16,
+      "update_evidence_occurrences": 7680,
+      "warmup_max_local_order": 200,
+      "warmup_max_receipts": 200,
+      "warmup_max_update_order": 403,
+      "warmup_rounds": 5
+    },
+    "stages": {
+      "GraphCore": {
+        "median_ms": 17.858409,
+        "min_ms": 17.019732,
+        "max_ms": 19.0491,
+        "median_bytes": 832037.0,
+        "median_allocs": 390.0,
+        "observations": 9
+      },
+      "LeaderBuildFull": {
+        "median_ms": 42.057687,
+        "min_ms": 41.279582,
+        "max_ms": 43.937061,
+        "median_bytes": 6054274.0,
+        "median_allocs": 1894.0,
+        "observations": 9
+      },
+      "CandidateCheckCore": {
+        "median_ms": 17.685836,
+        "min_ms": 17.214841,
+        "max_ms": 19.316474,
+        "median_bytes": 832037.0,
+        "median_allocs": 390.0,
+        "observations": 9
+      },
+      "FollowerVerifyFull": {
+        "median_ms": 23.408096,
+        "min_ms": 22.438134,
+        "max_ms": 24.645733,
+        "median_bytes": 6054272.0,
+        "median_allocs": 1894.0,
+        "observations": 9
+      },
+      "CommitFinalizeFull": {
+        "median_ms": 43.105288,
+        "min_ms": 41.370336,
+        "max_ms": 45.010092,
+        "median_bytes": 5387655.0,
+        "median_allocs": 9308.0,
+        "observations": 9
+      }
+    },
+    "rho": {
+      "median": 0.5571961754335008,
+      "min": 0.536018928679474,
+      "max": 0.5697640919196112
+    }
+  }
+}

@@ -61,6 +61,16 @@ class OfferedRateResultTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "fault configuration"):
             self.write_result()
 
+    def test_delay_is_recorded_and_mismatch_is_rejected(self):
+        self.parameters["byzantine_lo_delay_ms"] = 200
+        self.metrics["fault_metadata"] = [{"faults": 1, "byzantine_count": 1, "byzantine_lo_delay_ms": 200}]
+        result, _ = self.write_result()
+        self.assertEqual(result["byzantine_lo_delay_ms"], 200)
+        self.assertIn("-d200-", result["run_id"])
+        self.metrics["fault_metadata"][0]["byzantine_lo_delay_ms"] = 0
+        with self.assertRaisesRegex(RuntimeError, "byzantine delay"):
+            self.write_result()
+
     def test_saturated_finalization_does_not_fail_rate_check(self):
         self.metrics.update(submitted=19999, finalized=100)
         result, warning = self.write_result()
@@ -154,10 +164,12 @@ Completion Ratio: 0.99
             path = Path(directory) / "sample.log"
             path.write_text(text, encoding="utf-8")
             result = fabfile._parse_log(path)
+            path.write_text(text.replace("behavior=reverse", "behavior=reverse lo_delay=200ms"), encoding="utf-8")
+            self.assertEqual(fabfile._parse_log(path)["fault_metadata"][0]["byzantine_lo_delay_ms"], 200)
         self.assertEqual(result["build_metadata"][0]["revision"], "abc")
         self.assertEqual([sample["batch_queue"] for sample in result["diagnostics_samples"]], [2, 3])
         self.assertEqual(result["average_tps"], 99)
-        self.assertEqual(result["fault_metadata"], [{"faults": 1, "byzantine_count": 0, "attack_model": "reverse"}])
+        self.assertEqual(result["fault_metadata"], [{"faults": 1, "byzantine_count": 0, "attack_model": "reverse", "byzantine_lo_delay_ms": 0}])
 
 
 class ByzantineSweepTests(unittest.TestCase):
@@ -170,12 +182,14 @@ class ByzantineSweepTests(unittest.TestCase):
         }
 
     def test_command_keeps_f_fixed_through_sweep(self):
+        self.matrix["byzantine_lo_delay_ms"] = 200
         for b in fabfile._byzantine_values(self.matrix):
             p = fabfile._remote_parameters(self.matrix, 20, 100, b)
             fabfile._validate_parameters(p)
             command = fabfile._command(p, [19])
             self.assertEqual(command[command.index("-f") + 1], "4")
             self.assertEqual(command[command.index("-byzantine-count") + 1], str(b))
+            self.assertEqual(command[command.index("-byzantine-lo-delay") + 1], "200ms")
             self.assertIn(f"-f4-b{b}-", fabfile._run_id("remote", p, 1))
 
     def test_legacy_and_explicit_zero(self):
@@ -186,6 +200,13 @@ class ByzantineSweepTests(unittest.TestCase):
         self.assertEqual(fabfile._byzantine_values({"byzantine_count": 0}), [0])
         local = {**self.matrix, "nodes": 20, "rate": 100, "byzantine_count": 0}
         self.assertEqual(fabfile._local_parameters({"benchmark": {"local": local}})["byzantine_count"], 0)
+        self.assertEqual(fabfile._local_parameters({"benchmark": {"local": local}})["byzantine_lo_delay_ms"], 0)
+        self.assertEqual(fabfile._remote_parameters(self.matrix, 20, 100, 0)["byzantine_lo_delay_ms"], 0)
+
+    def test_invalid_delays_are_rejected(self):
+        for delay in [-1, True, 0.5, "200", 2**63]:
+            with self.subTest(delay=delay), self.assertRaisesRegex(RuntimeError, "byzantine_lo_delay_ms"):
+                fabfile._validate_parameters({**self.matrix, "nodes": 20, "rate": 100, "byzantine_count": 0, "byzantine_lo_delay_ms": delay})
 
     def test_invalid_counts_are_rejected(self):
         for count in [-1, 5, 1.5, True, "2", []]:

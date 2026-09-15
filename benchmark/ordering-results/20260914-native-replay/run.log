@@ -1,0 +1,6 @@
+=== RUN   TestThemisOrderingReplay
+    ordering_replay_test.go:73: transaction identity differs from saved input
+--- FAIL: TestThemisOrderingReplay (0.00s)
+FAIL
+FAIL	SpeedFair_simplify/pkg/ofo	0.595s
+FAIL

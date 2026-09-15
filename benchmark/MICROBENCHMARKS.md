@@ -104,9 +104,10 @@ LocalOrder 和 UpdateOrder 仍携带该副本全部适用接收历史，实际�
 | `late_completed`（可选） | 再投递开头已完成的 3 笔，admission 忽略；有效新增为零、无候选；验证/提交 N/A |
 | `cycle` | 96 fresh，三组块旋转接收顺序；断言新图最大 SCC=96、输出=96，无保留。不是任意小环，也不冒称 AUTIG 的保留/部分释放 SCC |
 
-阻塞由首个三节点图中一对从未共同出现的交易产生；后面的完整图即使可排序也必须等待。
-此结构符合**当前代码**允许的接收输入；继承 README 已记录的 partial-list 权重论文解释限制，
-不能以此声称解决了该限制。若其他合法 n/f/gamma 不能形成预期结构，断言失败，不强造图。
+阻塞由首个图中一对共同出现、但两个方向都未达到建边门槛的 shaded 交易产生；
+通过指向 solid 节点的路径保留。单方出现计票仍然启用。后面的完整图即使可排序也必须等待。
+若其他合法 n/f/gamma 不能形成预期结构，断言失败，不强造图。
+新增固定配置机制实验及独立推导见 [THEMIS_MECHANISM.md](THEMIS_MECHANISM.md)。
 
 交易 canonical bytes：前 8 字节 big-endian seed、再 8 字节递增 serial，剩余第 j 字节为
 `(31*j + serial + seed) mod 256`；ID 使用生产 `TransactionID`。

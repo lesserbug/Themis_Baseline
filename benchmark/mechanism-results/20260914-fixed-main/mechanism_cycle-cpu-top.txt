@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build2974265125\b001\ofo.test.exe2026-09-14 02:58:14.2795953 +1000 AEST
+Type: cpu
+Time: 2026-09-14 02:58:15 AEST
+Duration: 5.14s, Total samples = 4.85s (94.37%)
+Showing nodes accounting for 4.08s, 84.12% of 4.85s total
+Dropped 116 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 115
+      flat  flat%   sum%        cum   cum%
+     0.97s 20.00% 20.00%      0.97s 20.00%  memeqbody
+     0.61s 12.58% 32.58%      0.61s 12.58%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.44s  9.07% 41.65%      0.44s  9.07%  aeshashbody
+     0.31s  6.39% 48.04%      0.61s 12.58%  SpeedFair_simplify/pkg/ofo.containsTx (inline)
+     0.23s  4.74% 52.78%      1.05s 21.65%  runtime.mapaccess1
+     0.18s  3.71% 56.49%      1.50s 30.93%  runtime.mapassign
+     0.16s  3.30% 59.79%      0.16s  3.30%  runtime.memclrNoHeapPointers
+     0.15s  3.09% 62.89%      0.15s  3.09%  internal/runtime/maps.(*groupReference).key (inline)
+     0.13s  2.68% 65.57%      0.45s  9.28%  runtime.mapaccess2
+     0.12s  2.47% 68.04%      0.12s  2.47%  runtime.memequal
+     0.11s  2.27% 70.31%      0.49s 10.10%  SpeedFair_simplify/pkg/ofo.addEdge (inline)
+     0.10s  2.06% 72.37%      2.81s 57.94%  SpeedFair_simplify/pkg/ofo.(*DependencyManager).BuildGraphAndClassifyTxs
+     0.08s  1.65% 74.02%      0.54s 11.13%  runtime.memhash_varlen
+     0.06s  1.24% 75.26%      0.06s  1.24%  crypto/internal/fips140/edwards25519/field.feSquare
+     0.06s  1.24% 76.49%      0.06s  1.24%  crypto/internal/fips140/sha256.blockSHANI
+     0.06s  1.24% 77.73%      0.06s  1.24%  runtime.memmove
+     0.05s  1.03% 78.76%      0.05s  1.03%  internal/runtime/maps.h2 (inline)
+     0.04s  0.82% 79.59%      0.04s  0.82%  crypto/internal/fips140/edwards25519/field.feMul
+     0.04s  0.82% 80.41%      0.13s  2.68%  internal/runtime/maps.(*table).uncheckedPutSlot
+     0.04s  0.82% 81.24%      0.04s  0.82%  internal/runtime/maps.ctrlGroup.matchEmptyOrDeleted (inline)
+     0.03s  0.62% 81.86%      1.16s 23.92%  SpeedFair_simplify/pkg/ofo.edgeMapsEqual
+     0.03s  0.62% 82.47%      0.03s  0.62%  internal/runtime/maps.(*Map).directoryAt (inline)
+     0.03s  0.62% 83.09%      0.03s  0.62%  internal/runtime/maps.(*groupsReference).group (inline)
+     0.03s  0.62% 83.71%      0.03s  0.62%  runtime.typePointers.next
+     0.02s  0.41% 84.12%      0.13s  2.68%  SpeedFair_simplify/pkg/types.writeTxIDs

@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build2726135672\b001\ofo.test.exe2026-09-14 02:58:25.0116755 +1000 AEST
+Type: cpu
+Time: 2026-09-14 02:58:26 AEST
+Duration: 5.10s, Total samples = 4.85s (95.17%)
+Showing nodes accounting for 4.44s, 91.55% of 4.85s total
+Dropped 130 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 72
+      flat  flat%   sum%        cum   cum%
+     1.54s 31.75% 31.75%      3.77s 77.73%  SpeedFair_simplify/pkg/ofo.FairUpdate
+     1.25s 25.77% 57.53%      1.25s 25.77%  memeqbody
+     0.32s  6.60% 64.12%      1.80s 37.11%  bytes.Equal (inline)
+     0.30s  6.19% 70.31%      0.30s  6.19%  runtime.memequal
+     0.13s  2.68% 72.99%      0.13s  2.68%  aeshashbody
+     0.12s  2.47% 75.46%      0.12s  2.47%  crypto/internal/fips140/edwards25519/field.feMul
+     0.11s  2.27% 77.73%      0.11s  2.27%  crypto/internal/fips140/edwards25519/field.feSquare
+     0.10s  2.06% 79.79%      0.39s  8.04%  runtime.mapaccess2
+     0.07s  1.44% 81.24%      0.07s  1.44%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.06s  1.24% 82.47%      0.06s  1.24%  crypto/internal/fips140/edwards25519/field.(*Element).carryPropagateGeneric
+     0.06s  1.24% 83.71%      0.06s  1.24%  runtime.memmove
+     0.05s  1.03% 84.74%      0.05s  1.03%  runtime.memclrNoHeapPointers
+     0.04s  0.82% 85.57%      0.04s  0.82%  internal/runtime/maps.(*groupReference).key (inline)
+     0.04s  0.82% 86.39%      0.04s  0.82%  internal/runtime/maps.ctrlGroup.matchEmptyOrDeleted (inline)
+     0.04s  0.82% 87.22%      0.04s  0.82%  internal/runtime/maps.h2 (inline)
+     0.04s  0.82% 88.04%      0.06s  1.24%  runtime.typedmemmove
+     0.03s  0.62% 88.66%      0.03s  0.62%  runtime.memhash
+     0.03s  0.62% 89.28%      0.03s  0.62%  runtime.typePointers.next
+     0.02s  0.41% 89.69%      0.07s  1.44%  crypto/internal/fips140/edwards25519/field.(*Element).Add
+     0.02s  0.41% 90.10%      0.08s  1.65%  internal/runtime/maps.typedmemmove
+     0.02s  0.41% 90.52%      0.10s  2.06%  runtime.mapaccess1
+     0.02s  0.41% 90.93%      0.06s  1.24%  runtime.scanobject
+     0.01s  0.21% 91.13%      0.79s 16.29%  SpeedFair_simplify/pkg/ofo.(*OFOService).validateReplicaOrders
+     0.01s  0.21% 91.34%      0.09s  1.86%  SpeedFair_simplify/pkg/types.writeTxIDs
+     0.01s  0.21% 91.55%      0.31s  6.39%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult

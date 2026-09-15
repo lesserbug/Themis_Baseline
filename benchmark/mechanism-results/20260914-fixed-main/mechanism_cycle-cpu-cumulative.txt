@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build2974265125\b001\ofo.test.exe2026-09-14 02:58:14.2795953 +1000 AEST
+Type: cpu
+Time: 2026-09-14 02:58:15 AEST
+Duration: 5.14s, Total samples = 4.85s (94.37%)
+Showing nodes accounting for 3.22s, 66.39% of 4.85s total
+Dropped 116 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 115
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      4.45s 91.75%  SpeedFair_simplify/pkg/ofo.TestThemisMechanismProfile
+         0     0%     0%      4.45s 91.75%  testing.tRunner
+         0     0%     0%      4.27s 88.04%  SpeedFair_simplify/pkg/ofo.(*OFOService).VerifyProposal
+         0     0%     0%      3.11s 64.12%  SpeedFair_simplify/pkg/ofo.(*OFOService).recomputeProposal
+     0.10s  2.06%  2.06%      2.81s 57.94%  SpeedFair_simplify/pkg/ofo.(*DependencyManager).BuildGraphAndClassifyTxs
+     0.18s  3.71%  5.77%      1.50s 30.93%  runtime.mapassign
+     0.03s  0.62%  6.39%      1.16s 23.92%  SpeedFair_simplify/pkg/ofo.edgeMapsEqual
+         0     0%  6.39%      1.16s 23.92%  SpeedFair_simplify/pkg/ofo.graphEqual
+     0.23s  4.74% 11.13%      1.05s 21.65%  runtime.mapaccess1
+     0.97s 20.00% 31.13%      0.97s 20.00%  memeqbody
+     0.31s  6.39% 37.53%      0.61s 12.58%  SpeedFair_simplify/pkg/ofo.containsTx (inline)
+     0.61s 12.58% 50.10%      0.61s 12.58%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.08s  1.65% 51.75%      0.54s 11.13%  runtime.memhash_varlen
+     0.11s  2.27% 54.02%      0.49s 10.10%  SpeedFair_simplify/pkg/ofo.addEdge (inline)
+         0     0% 54.02%      0.45s  9.28%  internal/runtime/maps.(*table).grow
+         0     0% 54.02%      0.45s  9.28%  internal/runtime/maps.(*table).rehash
+     0.01s  0.21% 54.23%      0.45s  9.28%  runtime.mallocgc
+     0.13s  2.68% 56.91%      0.45s  9.28%  runtime.mapaccess2
+     0.44s  9.07% 65.98%      0.44s  9.07%  aeshashbody
+         0     0% 65.98%      0.31s  6.39%  internal/runtime/maps.(*table).reset
+         0     0% 65.98%      0.31s  6.39%  internal/runtime/maps.newGroups (inline)
+         0     0% 65.98%      0.31s  6.39%  internal/runtime/maps.newTable
+         0     0% 65.98%      0.31s  6.39%  internal/runtime/maps.newarray
+     0.01s  0.21% 66.19%      0.31s  6.39%  runtime.newarray
+     0.01s  0.21% 66.39%      0.28s  5.77%  runtime.mallocgcSmallNoscan

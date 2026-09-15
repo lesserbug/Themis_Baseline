@@ -1,0 +1,110 @@
+// Audit-only fixtures. Copy this file into an isolated copy of pkg/ofo as
+// audit_repros_test.go, then run: go test ./pkg/ofo -run TestIndependent -v -count=1
+// Production sources are not modified. Expected values below are derived from
+// ePrint 2022 Figs.1-3 and dissertation p.138, not another implementation run.
+package ofo
+
+import (
+ "SpeedFair_simplify/pkg/network"
+ "SpeedFair_simplify/pkg/types"
+ "context"
+ "reflect"
+ "testing"
+)
+
+func TestIndependentSingleReceiptVotes(t *testing.T) {
+ a,b:=testTx(1),testTx(2)
+ reports:=[]*types.LocalOrder{localOrder(0,a,b),localOrder(1,b,a),localOrder(2,a),localOrder(3,b)}
+ dm:=NewDependencyManager(); dm.BuildGraphAndClassifyTxs(reports,5,1,1,nil);dm.CutShadedTail()
+ // The four reports vote AB, BA, AB, BA. Both vertices occur 3 times.
+ if dm.weights[a][b]!=2 || dm.weights[b][a]!=2 || !graphHasEdge(dm.graph,a,b) || !IsTournament(dm.graph){t.Fatal("dissertation weight rule violated")}
+ t.Log("paper: presence=(3,3), weights=(2,2), ID tie A<B -> A->B; current agrees; co-presence-only would give (1,1) and no edge")
+}
+
+func TestIndependentUpdateVersionDifference(t *testing.T) {
+ a,b:=testTx(1),testTx(2)
+ g:=&types.DependencyGraph{Nodes:map[[32]byte]bool{a:true,b:true},Edges:map[[32]byte][][32]byte{}}
+ reports:=[]*types.UpdateOrder{{ReplicaID:0,OrderedTxs:[][32]byte{a,b}},{ReplicaID:1,OrderedTxs:[][32]byte{a,b}},{ReplicaID:2},{ReplicaID:3}}
+ got:=FairUpdate(context.Background(),reports,g,5,1,1)
+ // Both have presence 2; weight AB=2. 2021 Fig.2 adds AB, whereas
+ // 2022 Fig.2 requires source presence >=3 and therefore adds nothing.
+ if len(got)!=0 {t.Fatal("2022 source-presence requirement violated")}
+ t.Log("2021 literal rule: A->B; 2022 and current: no edge because source presence 2<3")
+}
+
+func TestIndependentFractionalGammaLemmaGap(t *testing.T) {
+ a,b:=testTx(1),testTx(2)
+ if err:=ValidateThemisParameters(6,1,.9);err!=nil{t.Fatal(err)}
+ reports:=[]*types.LocalOrder{localOrder(0,a,b),localOrder(1,a,b),localOrder(2,b,a),localOrder(3,b,a),localOrder(4)}
+ dm:=NewDependencyManager();dm.BuildGraphAndClassifyTxs(reports,6,1,.9,nil);dm.CutShadedTail()
+ // n(2gamma-1)=4.8>4; n-2f=4. Literal n(1-gamma)+f+1=2.6,
+ // so the integer threshold is 3. Four occurrences each, votes 2:2.
+ // This reproduces a source/discretization gap, not a failed Go calculation.
+ if edgeThreshold(6,1,.9)!=3 || dm.txStates[a]!=types.StateSolid || dm.txStates[b]!=types.StateSolid || IsTournament(dm.graph){t.Fatal("expected fractional-boundary witness not reproduced")}
+ t.Log("current matches literal Fig.1 but contradicts Lemma B.1: two solid vertices, no edge; n=6 F=1 gamma=.9, weights 2:2, threshold 3")
+}
+
+func TestIndependentReverseCanLeaveGraphUnchanged(t *testing.T) {
+ a,b,c:=testTx(1),testTx(2),testTx(3)
+ for attackers:=0;attackers<=4;attackers++ {
+  reports:=make([]*types.LocalOrder,16)
+  for i:=0;i<16;i++ {ids:=[][32]byte{a,b,c}; if i>=16-attackers{ids=[][32]byte{c,b,a}}; reports[i]=localOrder(uint64(i),ids...)}
+  dm:=NewDependencyManager();dm.BuildGraphAndClassifyTxs(reports,20,4,1,nil);dm.CutShadedTail()
+  if !graphHasEdge(dm.graph,a,b)||!graphHasEdge(dm.graph,a,c)||!graphHasEdge(dm.graph,b,c)||!reflect.DeepEqual(dm.ComputeFairOrder(),[][32]byte{a,b,c}){t.Fatalf("unexpected graph at adopted attackers=%d",attackers)}
+  t.Logf("adopted attackers=%d: forward votes=%d, backward votes=%d<5, unchanged transitive graph and output A,B,C",attackers,16-attackers,attackers)
+ }
+}
+
+func auditPartialFirst(t *testing.T,s *OFOService,auth *testOrderAuthenticator)*types.LeaderProposal{
+ a,b,z:=testTx(1),testTx(2),testTx(3)
+ // Presence A=B=2, Z=4; weights AB=BA=1, AZ=ZA=BZ=ZB=2.
+ // ID ties point A->Z and B->Z, so both shaded nodes reach solid Z.
+ p:=s.buildProposal(signedOrders(t,auth,5,1,1,map[uint64][][32]byte{0:{a,b,z},1:{b,a,z},2:{z},3:{z}},nil))
+ if p==nil||IsTournament(p.Graph)||!s.CommitProposal(p){t.Fatal("valid partial proposal failed")};return p
+}
+
+func TestIndependentProposalBoundaryAndUpdateScope(t *testing.T){
+ auth:=newTestOrderAuthenticator(5);s,err:=NewOFOService(1,5,1,1,&testNetwork{},1,150,false,auth);if err!=nil{t.Fatal(err)};defer s.Stop()
+ a,b,z,c:=testTx(1),testTx(2),testTx(3),testTx(4)
+ auditPartialFirst(t,s,auth)
+ fresh:=map[uint64][][32]byte{0:{c},1:{c},2:{c},3:{c}}
+ updates:=map[uint64]map[uint64][][32]byte{1:{0:{a,b},1:{b,a}}}
+ second:=s.buildProposal(signedOrders(t,auth,5,1,2,fresh,updates))
+ if second==nil||!s.CommitProposal(second)||s.GetFinalizedCount()!=0{t.Fatal("later complete proposal crossed incomplete prefix")}
+ t.Log("paper and current: complete proposal {C} remains blocked behind incomplete {A,B,Z}")
+ // Implementation evidence scope includes all four held IDs, though only A,B
+ // are endpoints of missing edges. This is extra work, not altered pair votes.
+ net:=&testNetwork{sent:make(chan network.Message,1)};s.network=net;putKnownTransactions(s,a,b,z,c);s.generateAndSendOrders()
+ report:=(<-net.sent).Payload.(*types.ReplicaOrders)
+ if report.Update==nil||len(report.Update.OrderedTxs)!=4{t.Fatal("expected broad Update not reproduced")}
+ t.Log("current Update contains A,B,Z,C; missing-edge endpoints are only A,B (Appendix Fig.7)")
+ thirdUpdates:=map[uint64]map[uint64][][32]byte{1:{0:{a,b},1:{b,a},2:{a}}}
+ third:=s.buildProposal(signedOrders(t,auth,5,1,3,nil,thirdUpdates))
+ if third==nil||!s.CommitProposal(third)||!reflect.DeepEqual(s.GetFinalizedOrder(),[][32]byte{a,b,z,c}){t.Fatal("paper update/unspooling order violated")}
+ t.Log("third proposal: source A occurs 3 times, votes AB=2 BA=1; releases A,B,Z,C, with solid Z at first proposal boundary")
+}
+
+func TestIndependentQueuedEvidenceBecomesInvalid(t *testing.T){
+ auth:=newTestOrderAuthenticator(5);s,err:=NewOFOService(1,5,1,1,&testNetwork{},1,150,false,auth);if err!=nil{t.Fatal(err)};defer s.Stop()
+ a,b,z,c:=testTx(1),testTx(2),testTx(3),testTx(4)
+ queued:=signedOrders(t,auth,5,1,2,map[uint64][][32]byte{0:{a,b,z,c}},nil)[0]
+ if !s.validateReplicaOrders(queued){t.Fatal("fixture invalid before state change")}
+ auditPartialFirst(t,s,auth)
+ if s.validateReplicaOrders(queued){t.Fatal("expected stale-context rejection not reproduced")}
+ rebased:=signedOrders(t,auth,5,1,2,map[uint64][][32]byte{0:{c}},map[uint64]map[uint64][][32]byte{1:{0:{a,b,z}}})[0]
+ if !s.validateReplicaOrders(rebased){t.Fatal("new-context report should be valid")}
+ t.Log("same valid signature and unused sequence: accepted before commit, rejected after commit; correctly regenerated List/Update passes. Do not bypass validation")
+}
+
+type auditCountingAuth struct{*testOrderAuthenticator;checks int}
+func(a *auditCountingAuth)VerifyReplica(id uint64,digest [32]byte,sig []byte)bool{a.checks++;return a.testOrderAuthenticator.VerifyReplica(id,digest,sig)}
+
+func TestIndependentRepeatedLeaderVerification(t *testing.T){
+ base:=newTestOrderAuthenticator(5);auth:=&auditCountingAuth{testOrderAuthenticator:base};s,err:=NewOFOService(1,5,1,1,&testNetwork{},1,150,false,auth);if err!=nil{t.Fatal(err)};defer s.Stop()
+ a:=testTx(1);reports:=signedOrders(t,base,5,1,1,map[uint64][][32]byte{0:{a},1:{a},2:{a},3:{a}},nil)
+ for _,r:=range reports{if !s.validateReplicaOrders(r){t.Fatal("invalid fixture")}}
+ p:=s.buildProposal(reports);if p==nil||!s.VerifyProposal(p){t.Fatal("build/verify failed")}
+ if auth.checks!=12{t.Fatalf("signature checks=%d want12",auth.checks)}
+ if !s.CommitVerifiedProposal(p)||auth.checks!=12{t.Fatal("verified commit repeated signature verification")}
+ t.Log("collector-equivalent validation + build + hosting-equivalent verify: 12 checks for 4 signed lists; verified commit adds none")
+}

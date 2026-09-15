@@ -34,6 +34,7 @@ def _run_id(mode, parameters, run):
     return (
         f"{mode}-n{parameters['nodes']}-f{parameters['faults']}"
         f"-b{_byzantine_count(parameters)}"
+        f"-d{parameters.get('byzantine_lo_delay_ms', 0)}"
         f"-r{parameters['rate']}-i{parameters['lo_interval']}"
         f"-run{run}-{timestamp}-{uuid4().hex[:8]}"
     )
@@ -97,6 +98,9 @@ def _validate_parameters(parameters):
     if n * (2 * gamma - 1) <= 4 * f:
         raise RuntimeError("Themis requires n > 4f/(2*gamma_all-1)")
     _byzantine_count(parameters)
+    delay = parameters.get("byzantine_lo_delay_ms", 0)
+    if type(delay) is not int or not 0 <= delay <= (2**63 - 1) // 1000000:
+        raise RuntimeError("byzantine_lo_delay_ms must be a nonnegative integer representable as a Go duration")
     if int(parameters["tx_size"]) < 16:
         raise RuntimeError("tx_size must be at least 16 bytes")
     for name in ("rate", "lo_interval", "lo_size", "duration"):
@@ -127,6 +131,7 @@ def _command(parameters, node_ids, config="config.json", binary=None):
         "-nodes", ids,
         "-f", str(parameters["faults"]),
         "-byzantine-count", str(_byzantine_count(parameters)),
+        "-byzantine-lo-delay", str(parameters.get("byzantine_lo_delay_ms", 0)) + "ms",
         "-gamma", str(parameters["gamma"]),
         "-lo-interval", str(parameters["lo_interval"]),
         "-lo-size", str(parameters["lo_size"]),
@@ -196,8 +201,8 @@ def _parse_log(path):
         "build_metadata": [loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE)],
         "diagnostics_samples": [loads(value) for value in re.findall(r"^THEMIS DIAGNOSTICS (\{[^\n]+\})$", text, re.MULTILINE)],
         "fault_metadata": [
-            {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse"}
-            for f, b in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse$", text, re.MULTILINE)
+            {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse", "byzantine_lo_delay_ms": _duration_ms(d) if d else 0}
+            for f, b, d in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse(?: lo_delay=(\S+))?$", text, re.MULTILINE)
         ],
     }
 
@@ -207,6 +212,8 @@ def _write_result(mode, parameters, run, metrics):
     for reported in metrics.get("fault_metadata", []):
         if reported["faults"] != int(parameters["faults"]) or reported["byzantine_count"] != actual_byzantine:
             raise RuntimeError("reported fault configuration differs from requested parameters")
+        if reported.get("byzantine_lo_delay_ms", 0) != parameters.get("byzantine_lo_delay_ms", 0):
+            raise RuntimeError("reported byzantine delay differs from requested parameters")
     states = metrics["replica_states"]
     if set(states) != {str(i) for i in range(parameters["nodes"])} or len(set(states.values())) != 1:
         raise RuntimeError("replicas did not report the same final committed sequence, state and fragment")
@@ -252,6 +259,7 @@ def _write_result(mode, parameters, run, metrics):
         **parameters,
         **metrics,
         "byzantine_count": actual_byzantine,
+        "byzantine_lo_delay_ms": parameters.get("byzantine_lo_delay_ms", 0),
         "attack_model": "reverse",
     }
     result["run_id"] = parameters.get("run_id") or _run_id(mode, parameters, run)
@@ -285,6 +293,7 @@ def _local_parameters(settings):
     parameters = dict(settings["benchmark"]["local"])
     parameters.pop("runs", None)
     parameters["byzantine_count"] = _byzantine_count(parameters)
+    parameters.setdefault("byzantine_lo_delay_ms", 0)
     return parameters
 
 
@@ -293,6 +302,7 @@ def _remote_parameters(matrix, nodes, rate, byzantine_count=None):
         "nodes": int(nodes),
         "faults": int(matrix["faults"]),
         "byzantine_count": _byzantine_count({"faults": matrix["faults"], "byzantine_count": byzantine_count}),
+        "byzantine_lo_delay_ms": matrix.get("byzantine_lo_delay_ms", 0),
         "gamma": float(matrix["gamma"]),
         "rate": int(rate),
         "tx_size": int(matrix["tx_size"]),
@@ -510,8 +520,8 @@ def _run_remote_once(records, settings, parameters, run):
             metrics["log_paths"].append(str(path.resolve()))
             metrics["build_metadata"].extend(loads(value) for value in re.findall(r"^THEMIS BUILD (\{[^\n]+\})$", text, re.MULTILINE))
             metrics["fault_metadata"].extend(
-                {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse"}
-                for f, b in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse$", text, re.MULTILINE)
+                {"faults": int(f), "byzantine_count": int(b), "attack_model": "reverse", "byzantine_lo_delay_ms": _duration_ms(d) if d else 0}
+                for f, b, d in re.findall(r"^BENCHMARK FAULTS tolerated=(\d+) byzantine=(\d+) behavior=reverse(?: lo_delay=(\S+))?$", text, re.MULTILINE)
             )
         metrics["replica_states"].update({
             replica: (seq, state, digest)

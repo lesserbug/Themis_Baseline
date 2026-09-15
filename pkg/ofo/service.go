@@ -544,6 +544,7 @@ type OFOService struct {
 	finalizedCountForLatency int64
 	measuredFinalized        int
 	MeasurementDeadline      time.Time
+	ByzantineLODelay         time.Duration // Set before Start; only delays malicious report generation.
 	lastCommittedDigest      [32]byte
 	pipelineCtx              context.Context
 	pipelineCancel           context.CancelFunc
@@ -628,6 +629,18 @@ func (s *OFOService) Start(ctx context.Context) {
 		case <-ticker.C:
 			if ctx.Err() != nil {
 				return
+			}
+			if s.isMalicious && s.ByzantineLODelay > 0 {
+				timer := time.NewTimer(s.ByzantineLODelay)
+				select {
+				case <-timer.C:
+				case <-ctx.Done():
+					timer.Stop()
+					return
+				}
+				if ctx.Err() != nil {
+					return
+				}
 			}
 			s.generateAndSendOrders()
 		case <-ctx.Done():

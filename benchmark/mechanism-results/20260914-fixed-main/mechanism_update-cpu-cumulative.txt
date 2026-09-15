@@ -1,0 +1,34 @@
+File: ofo.test.exe
+Build ID: C:\Users\PENGKU~1\AppData\Local\Temp\go-build2726135672\b001\ofo.test.exe2026-09-14 02:58:25.0116755 +1000 AEST
+Type: cpu
+Time: 2026-09-14 02:58:26 AEST
+Duration: 5.10s, Total samples = 4.85s (95.17%)
+Showing nodes accounting for 3.69s, 76.08% of 4.85s total
+Dropped 130 nodes (cum <= 0.02s)
+Showing top 25 nodes out of 72
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      4.74s 97.73%  SpeedFair_simplify/pkg/ofo.TestThemisMechanismProfile
+         0     0%     0%      4.74s 97.73%  testing.tRunner
+         0     0%     0%      4.70s 96.91%  SpeedFair_simplify/pkg/ofo.(*OFOService).VerifyProposal
+         0     0%     0%      4.70s 96.91%  SpeedFair_simplify/pkg/ofo.(*OFOService).recomputeProposal
+     1.54s 31.75% 31.75%      3.77s 77.73%  SpeedFair_simplify/pkg/ofo.FairUpdate
+     0.32s  6.60% 38.35%      1.80s 37.11%  bytes.Equal (inline)
+     1.25s 25.77% 64.12%      1.25s 25.77%  memeqbody
+     0.01s  0.21% 64.33%      0.79s 16.29%  SpeedFair_simplify/pkg/ofo.(*OFOService).validateReplicaOrders
+     0.10s  2.06% 66.39%      0.39s  8.04%  runtime.mapaccess2
+         0     0% 66.39%      0.36s  7.42%  SpeedFair_simplify/pkg/ofo.(*testOrderAuthenticator).VerifyReplica
+         0     0% 66.39%      0.36s  7.42%  crypto/ed25519.Verify (inline)
+         0     0% 66.39%      0.36s  7.42%  crypto/ed25519.VerifyWithOptions
+         0     0% 66.39%      0.35s  7.22%  crypto/internal/fips140/ed25519.Verify (inline)
+         0     0% 66.39%      0.35s  7.22%  crypto/internal/fips140/ed25519.verify
+         0     0% 66.39%      0.35s  7.22%  crypto/internal/fips140/ed25519.verifyWithDom
+     0.01s  0.21% 66.60%      0.31s  6.39%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult
+     0.30s  6.19% 72.78%      0.30s  6.19%  runtime.memequal
+     0.01s  0.21% 72.99%      0.27s  5.57%  runtime.mapassign
+         0     0% 72.99%      0.19s  3.92%  internal/runtime/maps.(*table).grow
+         0     0% 72.99%      0.19s  3.92%  internal/runtime/maps.(*table).rehash
+         0     0% 72.99%      0.17s  3.51%  runtime.mallocgc
+     0.01s  0.21% 73.20%      0.17s  3.51%  runtime.memhash_varlen
+     0.01s  0.21% 73.40%      0.16s  3.30%  runtime.systemstack
+     0.13s  2.68% 76.08%      0.13s  2.68%  aeshashbody
+         0     0% 76.08%      0.13s  2.68%  crypto/internal/fips140/edwards25519.(*projP1xP1).Double

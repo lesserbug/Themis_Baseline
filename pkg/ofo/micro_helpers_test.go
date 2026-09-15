@@ -324,6 +324,12 @@ func makeMicroFixture(tb testing.TB, c microConfig, scenario string) *microFixtu
 	warmCommit()
 	history, fresh, release, cycle := 0, 0, false, false
 	switch scenario {
+	case "mechanism_small":
+		fresh = 24
+	case "mechanism_cycle":
+		fresh, cycle = 192, true
+	case "mechanism_update":
+		history, fresh, release = c.History, 8, true
 	case "low_release":
 		history, fresh, release = 12, 96, true
 	case "small_fresh":
